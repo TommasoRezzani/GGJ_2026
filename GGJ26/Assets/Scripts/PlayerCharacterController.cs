@@ -4,35 +4,38 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(CharacterController))]
 public class PlayerCharacterController : MonoBehaviour
 {
-    [Header("Look")] [SerializeField] private float fMouseSensitivity = 0.12f;
+    [Header("Look")][SerializeField] private float fMouseSensitivity = 0.12f;
     [SerializeField] private float fPitchMin = -80f;
     [SerializeField] private float fPitchMax = 80f;
 
     private float yaw;
     private float pitch;
 
-    [Header("Boolean")] [SerializeField] bool bIsGameplay = true;
+    [Header("Boolean")][SerializeField] bool bIsGameplay = true;
 
 
-    [Header("Movement")] [SerializeField] private float fMoveSpeed = 6f;
+    [Header("Movement")][SerializeField] private float fMoveSpeed = 6f;
 
-    [Header("Jump")] [SerializeField] private float fJumpForce = 7f;
+    [Header("Jump")][SerializeField] private float fJumpForce = 7f;
     [SerializeField] private int fMaxJumps = 1;
 
-    [Header("Dash")] [SerializeField] private float fDashSpeed = 18f;
+    [Header("Dash")][SerializeField] private float fDashSpeed = 18f;
     [SerializeField] private float fDashCooldown = 0.5f;
     private bool bDashOnlyWhenGrounded = false;
 
-    [Header("References")] [SerializeField]
+    [Header("References")]
+    [SerializeField]
     private Transform view; // Camera o pivot
 
-    [Header("Gravity")] [SerializeField] private float fGravity = -20f;
+    [Header("Gravity")][SerializeField] private float fGravity = -20f;
 
     private CharacterController controller;
     private Vector3 velocity;
 
     private int iJumpsRemaining;
     private float fLastDashTime;
+
+    private Vector3 currentRespawnPoint;
 
     void Awake()
     {
@@ -180,21 +183,28 @@ public class PlayerCharacterController : MonoBehaviour
     }
 
     // ----------------------
-    // POWER-UP / EQUIP API
+    // API PUBBLICHE
     // ----------------------
-    public void SetMaxJumps(int value)
+    public void SetMaxJumps(int value) => fMaxJumps = Mathf.Max(1, value);
+    public void SetJumpForce(float value) => fJumpForce = value;
+    public void SetDashSpeed(float value) => fDashSpeed = value;
+
+    // *** NUOVO: Metodo per aggiornare il checkpoint ***
+    public void SetRespawnPoint(Vector3 newPos)
     {
-        fMaxJumps = Mathf.Max(1, value);
-        iJumpsRemaining = fMaxJumps;
+        currentRespawnPoint = newPos;
     }
 
-    public void SetJumpForce(float value)
+    // *** NUOVO: Metodo "Scorciatoia" per morire ***
+    public void TeleportTo(Vector3 position)
     {
-        fJumpForce = value;
-    }
+        // Dobbiamo disabilitare momentaneamente il controller per teletrasportarlo
+        // altrimenti Unity potrebbe ignorare lo spostamento o fare conflitti
+        controller.enabled = false;
+        transform.position = position;
+        controller.enabled = true;
 
-    public void SetDashSpeed(float value)
-    {
-        fDashSpeed = value;
+        // Resetta la velocità (così non continui a cadere o scattare dopo il respawn)
+        velocity = Vector3.zero;
     }
 }
