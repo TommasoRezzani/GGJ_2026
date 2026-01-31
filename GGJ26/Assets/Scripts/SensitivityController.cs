@@ -11,12 +11,12 @@ public class MouseSensitivityController : MonoBehaviour
 
     // Questa rimane public e static perché DEVE essere letta dallo script della Camera.
     // Nota: Le variabili statiche NON si vedono nell'Inspector di base.
-    public static float fMouseSensitivity = 2.0f;
+    public static float fMouseSensitivity = 0.16f;
 
     void Start()
     {
-        // Recupera il valore salvato (default 2.0)
-        fMouseSensitivity = PlayerPrefs.GetFloat("MouseSensitivity", 2.0f);
+        // Recupera il valore salvato 
+        fMouseSensitivity = PlayerPrefs.GetFloat("MouseSensitivity", 0.16f);
         
         // Controllo di sicurezza: se ti sei dimenticato di trascinare lo slider, non crasha
         if (sensitivitySlider != null)
