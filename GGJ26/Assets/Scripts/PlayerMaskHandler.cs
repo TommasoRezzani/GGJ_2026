@@ -20,24 +20,17 @@ public class PlayerMaskHandler : MonoBehaviour
         if (Keyboard.current.digit1Key.wasPressedThisFrame)
         {
             DeActivateAnyMask(0);
-            ActivateMask(0);
         }
 
         if (Keyboard.current.digit2Key.wasPressedThisFrame)
         {
             DeActivateAnyMask(1);
-            ActivateMask(1);
         }
 
         if (Keyboard.current.digit3Key.wasPressedThisFrame)
         {
             DeActivateAnyMask(2);
-            ActivateMask(2);
         }
-    }
-
-    private void ActivateMask(int m)
-    {
     }
 
     private void DeActivateAnyMask(int m)
