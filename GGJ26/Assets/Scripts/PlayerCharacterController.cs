@@ -555,4 +555,14 @@ public class PlayerCharacterController : MonoBehaviour
 
         velocity = Vector3.zero;
     }
+
+    // Settings UI
+    public void SetGameplayControl(bool isActive)
+    {
+        // 1. Imposta la variabile che blocca/sblocca input e visuale
+        bIsGameplay = isActive;
+
+        // 2. Forza l'aggiornamento immediato del cursore usando la TUA logica esistente
+        ApplyCursorState(); 
+    }
 }
