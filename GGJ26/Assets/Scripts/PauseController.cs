@@ -57,7 +57,7 @@ public class PauseController : MonoBehaviour
         // 3. Disabilita controlli player e sblocca il mouse
         if (playerController != null)
         {
-            playerController.SetGameplayControl(false);
+            //TODO playerController.SetGameplayControl(false);
         }
     }
 
@@ -72,7 +72,7 @@ public class PauseController : MonoBehaviour
         // 3. Riabilita controlli player e blocca il mouse
         if (playerController != null)
         {
-            playerController.SetGameplayControl(true);
+            //TODO playerController.SetGameplayControl(true);
         }
     }
     
