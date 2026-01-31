@@ -1,53 +1,176 @@
+using System;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-
 public class PlayerMaskHandler : MonoBehaviour
 {
-    [SerializeField] public List<GameObject> mask;
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [Serializable]
+    public class MaskEntry
     {
-        DeActivateAnyMask(0);
+        [Tooltip("Visual object of the mask (Quad / UI overlay).")]
+        public GameObject goMaskObject;
+
+        [Tooltip("Gameplay configuration associated with this mask.")]
+        public MaskAbilityConfig maskConfig;
     }
 
-    // Update is called once per frame
-    void Update()
+    // --------------------------------------------------
+    // Inspector
+    // --------------------------------------------------
+
+    [Header("Masks Setup")]
+    [SerializeField] private List<MaskEntry> lMasks = new List<MaskEntry>();
+
+    [Tooltip("Initial mask index at game start.")]
+    [SerializeField] private int iStartMaskIndex = 0;
+
+    [Header("Input")]
+    [Tooltip("Key used to cycle masks.")]
+    [SerializeField] private Key kCycleMaskKey = Key.Q;
+
+    [Header("Debug")]
+    [SerializeField] private bool bLogMaskChanges = false;
+
+    // --------------------------------------------------
+    // Runtime
+    // --------------------------------------------------
+
+    private int iCurrentMaskIndex;
+    private PlayerCharacterController playerController;
+
+    // --------------------------------------------------
+    // Unity Lifecycle
+    // --------------------------------------------------
+
+    private void Awake()
     {
-        if (Keyboard.current.digit1Key.wasPressedThisFrame)
+        // Get player controller from parent hierarchy
+        playerController = GetComponentInParent<PlayerCharacterController>();
+
+        if (lMasks == null || lMasks.Count == 0)
         {
-            DeActivateAnyMask(0);
+            iCurrentMaskIndex = 0;
+            return;
         }
 
-        if (Keyboard.current.digit2Key.wasPressedThisFrame)
-        {
-            DeActivateAnyMask(1);
-        }
-
-        if (Keyboard.current.digit3Key.wasPressedThisFrame)
-        {
-            DeActivateAnyMask(2);
-        }
+        // Clamp start index
+        iCurrentMaskIndex = Mathf.Clamp(iStartMaskIndex, 0, lMasks.Count - 1);
     }
 
-    private void DeActivateAnyMask(int m)
+    private void Start()
     {
-        //deactivatemask but for any mask excluse the variabile
+        // Activate initial mask
+        if (lMasks != null && lMasks.Count > 0)
+            ActivateMask(iCurrentMaskIndex);
+    }
 
-        for (int n = 0; n < mask.Count; n++)
+    private void Update()
+    {
+        if (Keyboard.current == null)
+            return;
+
+        if (Keyboard.current[kCycleMaskKey].wasPressedThisFrame)
+            CycleNextMask();
+    }
+
+    // --------------------------------------------------
+    // Mask Logic
+    // --------------------------------------------------
+
+    /// <summary>
+    /// Cycles to the next mask in the list.
+    /// </summary>
+    public void CycleNextMask()
+    {
+        if (lMasks == null || lMasks.Count == 0)
+            return;
+
+        iCurrentMaskIndex = (iCurrentMaskIndex + 1) % lMasks.Count;
+        ActivateMask(iCurrentMaskIndex);
+    }
+
+    /// <summary>
+    /// Cycles to the previous mask in the list.
+    /// </summary>
+    public void CyclePreviousMask()
+    {
+        if (lMasks == null || lMasks.Count == 0)
+            return;
+
+        iCurrentMaskIndex = (iCurrentMaskIndex - 1 + lMasks.Count) % lMasks.Count;
+        ActivateMask(iCurrentMaskIndex);
+    }
+
+    /// <summary>
+    /// Forces activation of a specific mask index.
+    /// </summary>
+    public void SetMaskByIndex(int iIndex)
+    {
+        if (lMasks == null || lMasks.Count == 0)
+            return;
+
+        iCurrentMaskIndex = Mathf.Clamp(iIndex, 0, lMasks.Count - 1);
+        ActivateMask(iCurrentMaskIndex);
+    }
+
+    /// <summary>
+    /// Activates the selected mask:
+    /// - Enables its visual object
+    /// - Applies its gameplay configuration to the player
+    /// </summary>
+    private void ActivateMask(int iIndex)
+    {
+        // ---------------------------
+        // Visual activation
+        // ---------------------------
+        for (int i = 0; i < lMasks.Count; i++)
         {
-            //check if index of masks list is equal to 0
-            if (mask.IndexOf(mask[n]) == m)
+            if (lMasks[i].goMaskObject != null)
+                lMasks[i].goMaskObject.SetActive(i == iIndex);
+        }
+
+        // ---------------------------
+        // Gameplay application
+        // ---------------------------
+        if (playerController != null)
+        {
+            MaskAbilityConfig config = lMasks[iIndex].maskConfig;
+
+            if (config != null)
             {
-                mask[n].SetActive(true);
+                playerController.ApplyMask(config);
+
+                if (bLogMaskChanges)
+                    Debug.Log($"[MaskHandler] Applied mask: {config.name} ({config.maskType})");
             }
             else
             {
-                mask[n].SetActive(false);
+                // If no config is assigned, fallback to default player stats
+                playerController.SetDefaultStats();
+
+                if (bLogMaskChanges)
+                    Debug.Log("[MaskHandler] No MaskAbilityConfig found. Reverted to default stats.");
             }
         }
+        else
+        {
+            if (bLogMaskChanges)
+                Debug.LogWarning("[MaskHandler] PlayerCharacterController not found in parent hierarchy.");
+        }
+    }
+
+    // --------------------------------------------------
+    // Getters (optional)
+    // --------------------------------------------------
+
+    public int GetCurrentMaskIndex() => iCurrentMaskIndex;
+
+    public MaskAbilityConfig GetCurrentMaskConfig()
+    {
+        if (lMasks == null || lMasks.Count == 0)
+            return null;
+
+        return lMasks[iCurrentMaskIndex].maskConfig;
     }
 }
