@@ -15,7 +15,9 @@ public class PlayerCharacterController : MonoBehaviour
 
     [Header("Jump (Base)")]
     [SerializeField] private float fJumpForce = 7f;
-    [SerializeField] private float fMaxJumps = 1;
+    [SerializeField] private float iMaxJumps = 1;
+    
+
 
     [Header("Dash (Base)")]
     [SerializeField] private float fDashSpeed = 18f;
@@ -84,14 +86,14 @@ public class PlayerCharacterController : MonoBehaviour
         // Save defaults
         fDefaultMoveSpeed = fMoveSpeed;
         fDefaultJumpForce = fJumpForce;
-        fDefaultMaxJumps = fMaxJumps;
+        fDefaultMaxJumps = iMaxJumps;
         fDefaultDashSpeed = fDashSpeed;
         fDefaultDashCooldown = fDashCooldown;
         fDefaultGravity = fGravity;
         fDefaultGroundFriction = fGroundFriction;
         fDefaultAirFriction = fAirFriction;
 
-        iJumpsRemaining = (int)fMaxJumps;
+        iJumpsRemaining = (int)iMaxJumps;
 
         yaw = transform.eulerAngles.y;
         pitch = (view != null) ? view.localEulerAngles.x : transform.eulerAngles.x;
@@ -159,37 +161,55 @@ public class PlayerCharacterController : MonoBehaviour
     // -------------------------------------------------------
     private void HandleJump_NewInputSystem()
     {
-        if (Keyboard.current.spaceKey.isPressed && iJumpsRemaining > 0 && !bIsStunned)
+        // Reset jump counter when grounded
+        if (controller.isGrounded)
         {
-            // If Oni infinite dash is active, stop it when jumping
-            if (bIsOniInfiniteDashActive)
-                bIsOniInfiniteDashActive = false;
+            iJumpsRemaining = (int)iMaxJumps;
 
-            float fFinalJumpForce = fJumpForce;
-
-            // Oni: jump scales with horizontal speed
-            if (activeMaskConfig != null &&
-                activeMaskConfig.maskType == MaskType.Oni &&
-                activeMaskConfig.bOniJumpScaleWithSpeed)
-            {
-                float fSpeed = new Vector2(velocity.x, velocity.z).magnitude;
-                float fMaxSpeed = Mathf.Max(0.01f, activeMaskConfig.fOniSpeedForMaxJump);
-
-                float t = Mathf.Clamp01(fSpeed / fMaxSpeed);
-                float fMultiplier = Mathf.Lerp(
-                    activeMaskConfig.fOniJumpMinMultiplier,
-                    activeMaskConfig.fOniJumpMaxMultiplier,
-                    t
-                );
-
-                fFinalJumpForce *= fMultiplier;
-            }
-
-            velocity.y = fFinalJumpForce;
-            iJumpsRemaining--;
+            // Keep grounded stability
+            if (velocity.y < 0f)
+                velocity.y = -2f;
         }
 
+        bool bJumpPressed = Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame;
+        if (!bJumpPressed || iJumpsRemaining <= 0 || bIsStunned)
+            return;
+
+        // If Oni infinite dash is active, stop it when jumping
+        if (bIsOniInfiniteDashActive)
+            bIsOniInfiniteDashActive = false;
+
+        float fFinalJumpForce = ComputeFinalJumpForce();
+        velocity.y = fFinalJumpForce;
+
+        iJumpsRemaining--;
     }
+
+    private float ComputeFinalJumpForce()
+    {
+        float fFinalJumpForce = fJumpForce;
+
+        // Oni: jump scales with horizontal speed
+        if (activeMaskConfig != null &&
+            activeMaskConfig.maskType == MaskType.Oni &&
+            activeMaskConfig.bOniJumpScaleWithSpeed)
+        {
+            float fSpeed = new Vector2(velocity.x, velocity.z).magnitude;
+            float fMaxSpeed = Mathf.Max(0.01f, activeMaskConfig.fOniSpeedForMaxJump);
+
+            float t = Mathf.Clamp01(fSpeed / fMaxSpeed);
+            float fMultiplier = Mathf.Lerp(
+                activeMaskConfig.fOniJumpMinMultiplier,
+                activeMaskConfig.fOniJumpMaxMultiplier,
+                t
+            );
+
+            fFinalJumpForce *= fMultiplier;
+        }
+
+        return fFinalJumpForce;
+    }
+
 
     // -------------------------------------------------------
     // DASH
@@ -200,12 +220,12 @@ public class PlayerCharacterController : MonoBehaviour
 
         // Oni infinite dash: obligate forward force
         // and it works only if is pressing
-// Oni infinite dash: active ONLY while holding Shift
+        // Oni infinite dash: active ONLY while holding Shift
         if (bIsOniInfiniteDashActive)
         {
             bool bShiftHeld = Keyboard.current != null && Keyboard.current.leftShiftKey.isPressed;
 
-            // If shift is not held, do not force dash this frame
+            // If shift is not held, do not force dash
             if (!bShiftHeld)
                 return;
 
@@ -215,9 +235,9 @@ public class PlayerCharacterController : MonoBehaviour
 
             velocity.x = vDashDir.x * fDashSpeed;
             velocity.z = vDashDir.z * fDashSpeed;
-
             return;
         }
+
 
 
         if (Time.time < fLastDashTime + fDashCooldown)
@@ -307,7 +327,7 @@ public class PlayerCharacterController : MonoBehaviour
         // Apply overrides (common)
         if (cfg.moveSpeed >= 0f) fMoveSpeed = cfg.moveSpeed;
         if (cfg.jumpForce >= 0f) fJumpForce = cfg.jumpForce;
-        if (cfg.maxJumps >= 0) fMaxJumps = cfg.maxJumps;
+        if (cfg.maxJumps >= 0) iMaxJumps = cfg.maxJumps;
 
         if (cfg.dashSpeed >= 0f) fDashSpeed = cfg.dashSpeed;
         if (cfg.dashCooldown >= 0f) fDashCooldown = cfg.dashCooldown;
@@ -333,14 +353,14 @@ public class PlayerCharacterController : MonoBehaviour
         }
 
         // Ensure jumps remaining respects new max
-        iJumpsRemaining = (int)Mathf.Clamp(iJumpsRemaining, 0, fMaxJumps);
+        iJumpsRemaining = (int)Mathf.Clamp(iJumpsRemaining, 0, iMaxJumps);
     }
 
     public void SetDefaultStats()
     {
         fMoveSpeed = fDefaultMoveSpeed;
         fJumpForce = fDefaultJumpForce;
-        fMaxJumps = fDefaultMaxJumps;
+        iMaxJumps = fDefaultMaxJumps;
 
         fDashSpeed = fDefaultDashSpeed;
         fDashCooldown = fDefaultDashCooldown;
@@ -454,7 +474,7 @@ public class PlayerCharacterController : MonoBehaviour
 
         if (cfg.moveSpeed >= 0f) fMoveSpeed = cfg.moveSpeed;
         if (cfg.jumpForce >= 0f) fJumpForce = cfg.jumpForce;
-        if (cfg.maxJumps >= 0) fMaxJumps = cfg.maxJumps;
+        if (cfg.maxJumps >= 0) iMaxJumps = cfg.maxJumps;
 
         if (cfg.dashSpeed >= 0f) fDashSpeed = cfg.dashSpeed;
         if (cfg.dashCooldown >= 0f) fDashCooldown = cfg.dashCooldown;
@@ -515,7 +535,7 @@ public class PlayerCharacterController : MonoBehaviour
     // -------------------------------------------------------
     // Public setters (optional)
     // -------------------------------------------------------
-    public void SetMaxJumps(int value) => fMaxJumps = Mathf.Max(1, value);
+    public void SetMaxJumps(int value) => iMaxJumps = Mathf.Max(1, value);
     public void SetJumpForce(float value) => fJumpForce = value;
     public void SetDashSpeed(float value) => fDashSpeed = value;
 
