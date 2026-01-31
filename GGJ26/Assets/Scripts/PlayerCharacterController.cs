@@ -4,31 +4,30 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(CharacterController))]
 public class PlayerCharacterController : MonoBehaviour
 {
-    [Header("Look")][SerializeField] private float fMouseSensitivity = 0.12f;
     [SerializeField] private float fPitchMin = -80f;
     [SerializeField] private float fPitchMax = 80f;
 
     private float yaw;
     private float pitch;
 
-    [Header("Boolean")][SerializeField] bool bIsGameplay = true;
+    [Header("Boolean")] [SerializeField] bool bIsGameplay = true;
 
+    [Header("Movement")] [SerializeField] public float fMoveSpeed = 6f;
 
-    [Header("Movement")][SerializeField] private float fMoveSpeed = 6f;
-
-    [Header("Jump")][SerializeField] private float fJumpForce = 7f;
+    [Header("Jump")] [SerializeField] private float fJumpForce = 7f;
     [SerializeField] private int fMaxJumps = 1;
 
-    [Header("Dash")][SerializeField] private float fDashSpeed = 18f;
+    [Header("Dash")] [SerializeField] private float fDashSpeed = 18f;
     [SerializeField] private float fDashCooldown = 0.5f;
     private bool bDashOnlyWhenGrounded = false;
 
-    [Header("References")]
-    [SerializeField]
+    [Header("References")] [SerializeField]
     private Transform view; // Camera o pivot
 
-    [Header("Gravity")][SerializeField] private float fGravity = -20f;
+    [Header("Gravity")] [SerializeField] private float fGravity = -20f;
 
+    [Header("MasksPivot")] [SerializeField] private Transform maskPivot;
+    
     private CharacterController controller;
     private Vector3 velocity;
 
@@ -163,8 +162,8 @@ public class PlayerCharacterController : MonoBehaviour
         //Delta Mouse (pixel/frame)
         Vector2 delta = mouse.delta.ReadValue();
 
-        yaw += delta.x * fMouseSensitivity;
-        pitch -= delta.y * fMouseSensitivity;
+        yaw += delta.x * MouseSensitivityController.fMouseSensitivity;
+        pitch -= delta.y * MouseSensitivityController.fMouseSensitivity;
 
         pitch = Mathf.Clamp(pitch, fPitchMin, fPitchMax);
 
@@ -173,6 +172,14 @@ public class PlayerCharacterController : MonoBehaviour
 
         //Pitch on pivot/camera (only X)
         view.localRotation = Quaternion.Euler(pitch, 0, 0);
+
+        // Yaw on Pivot of Mask
+        if (maskPivot != null)
+        {
+            // stessa identica rotazione della view (pitch+yaw)
+            maskPivot.rotation = view.rotation;
+        }
+
     }
 
     // Cursor View is locked

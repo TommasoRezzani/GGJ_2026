@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 
 public class PlayerMaskHandler : MonoBehaviour
 {
-    [SerializeField] private List<GameObject> mask;
+    [SerializeField] public List<GameObject> mask;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
