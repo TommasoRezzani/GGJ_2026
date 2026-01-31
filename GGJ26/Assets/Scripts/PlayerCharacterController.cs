@@ -189,22 +189,21 @@ public class PlayerCharacterController : MonoBehaviour
     public void SetJumpForce(float value) => fJumpForce = value;
     public void SetDashSpeed(float value) => fDashSpeed = value;
 
-    // *** NUOVO: Metodo per aggiornare il checkpoint ***
+    // Checkpoint based on triggers
     public void SetRespawnPoint(Vector3 newPos)
     {
         currentRespawnPoint = newPos;
     }
 
-    // *** NUOVO: Metodo "Scorciatoia" per morire ***
+    // Death managed with teleport
     public void TeleportTo(Vector3 position)
     {
-        // Dobbiamo disabilitare momentaneamente il controller per teletrasportarlo
-        // altrimenti Unity potrebbe ignorare lo spostamento o fare conflitti
+        //Disable the controller to limit the conflict
         controller.enabled = false;
         transform.position = position;
         controller.enabled = true;
 
-        // Resetta la velocità (così non continui a cadere o scattare dopo il respawn)
+        // Reset velocity
         velocity = Vector3.zero;
     }
 }

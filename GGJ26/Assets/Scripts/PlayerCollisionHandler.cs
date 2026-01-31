@@ -8,48 +8,44 @@ public class PlayerCollisionHandler : MonoBehaviour
     void Start()
     {
         moveController = GetComponent<PlayerCharacterController>();
-        
-        // Imposta la posizione iniziale come primo checkpoint di default
+
+        // Last position setted for lastCheckpoint
         lastCheckpointPosition = transform.position;
     }
 
-    // ------------------------------------------------
-    // CASO A: Collisione SOLIDA (Muri, Spine solide, Pavimento)
-    // ------------------------------------------------
-    // Questa funzione viene chiamata da Unity ogni volta che il CharacterController
-    // tocca un altro collider mentre si muove.
+    // -------------------
+    // COLLISION OF PLAYER
+    // -------------------
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        // Se tocco un oggetto solido taggato "Kill"
         if (hit.gameObject.CompareTag("Kill"))
         {
             Respawn();
         }
     }
 
-    // ------------------------------------------------
-    // CASO B: Collisione TRIGGER (Checkpoint, Lava, Fuoco, Zone d'aria)
-    // ------------------------------------------------
-    // Questa funzione serve per oggetti in cui PUOI entrare
+    // --------------------------------------------
+    // CASO B: TRIGGER OF PLAYER (Checkpoint, Fire)
+    // --------------------------------------------
     private void OnTriggerEnter(Collider other)
     {
-        // Se entro in un checkpoint
+        // Checkpoint
         if (other.CompareTag("Respawn"))
         {
             lastCheckpointPosition = other.transform.position;
             Debug.Log("Checkpoint Salvato!");
         }
 
-        // Gestisce anche la morte se la trappola è un trigger (es. un ologramma o del gas)
+        //Trap
         if (other.CompareTag("Kill"))
         {
             Respawn();
         }
     }
 
+    //Respawn
     private void Respawn()
     {
-        Debug.Log("Giocatore morto. Respawn in corso...");
         if (moveController != null)
         {
             moveController.TeleportTo(lastCheckpointPosition);
