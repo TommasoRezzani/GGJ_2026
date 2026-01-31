@@ -59,6 +59,7 @@ public class PlayerCharacterController : MonoBehaviour
         HandleDash_NewInputSystem();
         ApplyGravity();
         HandleLook();
+        HandleMovingPlatform();
 
         controller.Move(velocity * Time.deltaTime);
     }
@@ -92,6 +93,43 @@ public class PlayerCharacterController : MonoBehaviour
         velocity.x = moveDir.x * fMoveSpeed;
         velocity.z = moveDir.z * fMoveSpeed;
     }
+
+    // Funzione dedicata alla gestione delle piattaforme
+private void HandleMovingPlatform()
+{
+    // Se siamo in aria (saltando o cadendo), ci stacchiamo subito
+    if (!controller.isGrounded)
+    {
+        transform.SetParent(null);
+        return;
+    }
+    // -------------
+    // RAYCAST FOR MOVE PLAT
+    // -------------
+    RaycastHit hit;
+    if (Physics.Raycast(transform.position, Vector3.down, out hit, 2.0f)) 
+    {
+        // Se colpiamo qualcosa con il tag "Floor"
+        if (hit.transform.CompareTag("Floor"))
+        {
+            // Ci imparentiamo se non lo siamo già
+            if (transform.parent != hit.transform)
+            {
+                transform.SetParent(hit.transform);
+            }
+        }
+        else
+        {
+            // Se siamo a terra ma non è un "Floor" (es. terreno normale), niente parent
+            transform.SetParent(null);
+        }
+    }
+    else
+    {
+        // Se il raycast non colpisce nulla (caso raro se isGrounded è true, ma per sicurezza)
+        transform.SetParent(null);
+    }
+}
 
     // ----------------------
     // JUMP
