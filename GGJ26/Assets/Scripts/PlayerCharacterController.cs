@@ -12,8 +12,7 @@ public class PlayerCharacterController : MonoBehaviour
 
     [Header("Boolean")] [SerializeField] bool bIsGameplay = true;
 
-
-    [Header("Movement")] [SerializeField] private float fMoveSpeed = 6f;
+    [Header("Movement")] [SerializeField] public float fMoveSpeed = 6f;
 
     [Header("Jump")] [SerializeField] private float fJumpForce = 7f;
     [SerializeField] private int fMaxJumps = 1;
@@ -27,13 +26,13 @@ public class PlayerCharacterController : MonoBehaviour
 
     [Header("Gravity")] [SerializeField] private float fGravity = -20f;
 
+    [Header("MasksPivot")] [SerializeField] private Transform maskPivot;
+    
     private CharacterController controller;
     private Vector3 velocity;
 
     private int iJumpsRemaining;
     private float fLastDashTime;
-
-    [SerializeField] private Transform maskPivot;
 
     private Vector3 currentRespawnPoint;
 
@@ -163,8 +162,8 @@ public class PlayerCharacterController : MonoBehaviour
         //Delta Mouse (pixel/frame)
         Vector2 delta = mouse.delta.ReadValue();
 
-        yaw += delta.x * MouseSensitivityController.mouseSensitivity;
-        pitch -= delta.y * MouseSensitivityController.mouseSensitivity;
+        yaw += delta.x * MouseSensitivityController.fMouseSensitivity;
+        pitch -= delta.y * MouseSensitivityController.fMouseSensitivity;
 
         pitch = Mathf.Clamp(pitch, fPitchMin, fPitchMax);
 
