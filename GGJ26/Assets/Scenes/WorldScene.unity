@@ -669,6 +669,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c23dfdbf03ba3547b1fec7a54be8223, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+  minSpeedToPass: 6
+  solidCollider: {fileID: 1303640570}
+  flameRenderer: {fileID: 1303640571}
 --- !u!65 &1303640570
 BoxCollider:
   m_ObjectHideFlags: 0
