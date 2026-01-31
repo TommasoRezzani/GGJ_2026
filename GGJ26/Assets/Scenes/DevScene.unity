@@ -303,6 +303,52 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d5e9cecd402c94d00a643a69180bea1e, type: 3}
+--- !u!1 &230587586
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 230587588}
+  - component: {fileID: 230587587}
+  m_Layer: 0
+  m_Name: GameManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &230587587
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 230587586}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f45ad32b7a47214d965d813241b96d7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PauseController
+  settingsPanel: {fileID: 0}
+  playerController: {fileID: 0}
+--- !u!4 &230587588
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 230587586}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -29.93822, y: 0, z: -34.21214}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &314895200 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: d5e9cecd402c94d00a643a69180bea1e, type: 3}
@@ -1576,7 +1622,7 @@ MonoBehaviour:
   bIsGameplay: 1
   fMoveSpeed: 6
   fJumpForce: 7
-  fMaxJumps: 1
+  iMaxJumps: 1
   fDashSpeed: 18
   fDashCooldown: 0.5
   bDashOnlyWhenGrounded: 0
@@ -1584,8 +1630,8 @@ MonoBehaviour:
   fGroundFriction: 10
   fAirFriction: 2.5
   view: {fileID: 1256734115}
-  currentMaskType: 0
-  bIsOniInfiniteDashActive: 0
+  currentMaskType: 1
+  bIsOniInfiniteDashActive: 1
   bIsStunned: 0
 --- !u!143 &1894558933
 CharacterController:
@@ -1654,3 +1700,4 @@ SceneRoots:
   - {fileID: 1894558931}
   - {fileID: 922858646}
   - {fileID: 1413793094}
+  - {fileID: 230587588}
