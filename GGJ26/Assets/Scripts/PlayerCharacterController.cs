@@ -169,7 +169,7 @@ public class PlayerCharacterController : MonoBehaviour
         pitch = Mathf.Clamp(pitch, fPitchMin, fPitchMax);
 
         // Yaw on Player (rotate on body)
-        transform.rotation = Quaternion.Euler(pitch, yaw, 0);
+        transform.rotation = Quaternion.Euler(0, yaw, 0);
 
         //Pitch on pivot/camera (only X)
         view.localRotation = Quaternion.Euler(pitch, 0, 0);
