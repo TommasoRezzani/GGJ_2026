@@ -61,7 +61,3 @@ il2cpp/
 # Test artifacts
 TestResults/
 coverage/
-
-/Library/
-
-*.asset
