@@ -7,8 +7,7 @@ public class FlameWallController : MonoBehaviour
     [SerializeField] private Collider solidCollider;
 
     [SerializeField] private Renderer flameRenderer;
-
-    private PlayerCharacterController PlayerCharacterController;
+    private MaskAbilityConfig activeMaskConfig;
 
     // [SerializeField] private ParticleSystem futureFlameParticles; // Da collegare in futuro
 
@@ -26,7 +25,7 @@ public class FlameWallController : MonoBehaviour
             if (playerScript != null)
             {
                 // Confrontiamo la tua variabile fMoveSpeed con il limite del muro
-                if (PlayerCharacterController.fMoveSpeed >= minSpeedToPass)
+                if (activeMaskConfig.moveSpeed >= minSpeedToPass)
                 {
                     SetWallActive(false); // PASSAGGIO APERTO
                 }

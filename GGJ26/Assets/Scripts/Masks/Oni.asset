@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0e1d4f9e4514a7da45a76b1aee6b639, type: 3}
+  m_Name: Oni
+  m_EditorClassIdentifier: Assembly-CSharp::MaskAbilityConfig
+  maskType: 2
+  moveSpeed: 20
+  jumpForce: 20
+  maxJumps: 2
+  gravity: -9999
+  airFriction: -30
+  groundFriction: 25.17
+  dashSpeed: 86.2
+  dashCooldown: 4
+  yukiEnableZeroGravity: 0
+  yukiZeroGravityDuration: 2
+  oniInfiniteDash: 0
+  oniResetDelayAfterSpace: 1
+  oniRecoveryDuration: 2
+  oniWallStunSeconds: 1
+  wallTag: Wall
