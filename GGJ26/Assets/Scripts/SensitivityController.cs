@@ -3,30 +3,38 @@ using UnityEngine.UI;
 
 public class MouseSensitivityController : MonoBehaviour
 {
-    // Riferimento allo Slider nella UI
-    public Slider sensitivitySlider;
+    // MODIFICA: Usiamo private + SerializeField. 
+    // È più sicuro perché altri script non possono "rompere" il riferimento allo slider,
+    // ma tu puoi comunque assegnarlo dall'Inspector.
+    [SerializeField] 
+    private Slider sensitivitySlider;
 
-    // Variabile statica per accedervi facilmente da altri script (es. MouseLook)
+    // Questa rimane public e static perché DEVE essere letta dallo script della Camera.
+    // Nota: Le variabili statiche NON si vedono nell'Inspector di base.
     public static float mouseSensitivity = 2.0f;
 
     void Start()
     {
-        // Se abbiamo salvato la sensibilità in precedenza, caricala
+        // Recupera il valore salvato (default 2.0)
         mouseSensitivity = PlayerPrefs.GetFloat("MouseSensitivity", 2.0f);
         
-        // Imposta lo slider al valore corrente
+        // Controllo di sicurezza: se ti sei dimenticato di trascinare lo slider, non crasha
         if (sensitivitySlider != null)
         {
             sensitivitySlider.value = mouseSensitivity;
-            // Aggiunge un listener che chiama il metodo quando lo slider si muove
             sensitivitySlider.onValueChanged.AddListener(UpdateSensitivity);
+        }
+        else
+        {
+            Debug.LogError("Attenzione: Non hai assegnato lo Slider nell'Inspector!");
         }
     }
 
+    // Anche qui, se il metodo è usato solo dallo slider via codice (AddListener), 
+    // potresti farlo privato, ma spesso si lascia public per debug o eventi UI diretti.
     public void UpdateSensitivity(float newValue)
     {
         mouseSensitivity = newValue;
-        // Opzionale: salva il valore per la prossima sessione di gioco
         PlayerPrefs.SetFloat("MouseSensitivity", mouseSensitivity);
     }
 }
