@@ -2,12 +2,14 @@ using UnityEngine;
 
 public class Checkpoint : MonoBehaviour
 {
+    private PlayerCharacterController player;
+    
     private void OnTriggerEnter(Collider other)
     {
-        // Cerca il player usando il nuovo sistema
-        if (other.TryGetComponent<PlayerCharacterController>(out PlayerCharacterController player))
+        // Check player controller is possessed
+        if (other.CompareTag("Player"))
         {
-            // Aggiorna il punto di respawn del player con la posizione di QUESTO checkpoint
+            // Update the position of respawn
             player.SetRespawnPoint(transform.position);
         }
     }

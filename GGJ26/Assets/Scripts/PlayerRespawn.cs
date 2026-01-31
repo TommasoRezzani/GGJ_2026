@@ -12,15 +12,14 @@ public class PlayerRespawn : MonoBehaviour
 
     public void Respawn()
     {
-        // Riporta il player alla posizione iniziale
+        // Reset of position
         transform.position = startPosition;
 
-        // Resetta la velocità per evitare inerzia residua
+        // Reset velocity
         if (TryGetComponent<Rigidbody>(out Rigidbody rb))
         {
-            // Nota: In Unity 6+ usa 'linearVelocity', nelle versioni precedenti usa 'velocity'
             rb.linearVelocity = Vector3.zero; 
-            rb.angularVelocity = Vector3.zero; // Ferma anche la rotazione
+            rb.angularVelocity = Vector3.zero; 
         }
     }
 }
