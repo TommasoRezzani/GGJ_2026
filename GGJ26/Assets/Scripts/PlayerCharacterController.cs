@@ -248,8 +248,15 @@ public class PlayerCharacterController : MonoBehaviour
 
     private void ApplyGravity() => velocity.y += fGravity * Time.deltaTime;
 
+    private Quaternion currentRespawnRotation;
     // --- RESPAWN & CHECKPOINT API ---
     public void SetRespawnPoint(Vector3 newPos) => currentRespawnPoint = newPos;
+    
+    public void SetRespawnPoint(Vector3 newPos, Quaternion newRot) 
+    {
+        currentRespawnPoint = newPos;
+        currentRespawnRotation = newRot;
+    }
 
     public void TeleportTo(Vector3 pos)
     {
@@ -259,6 +266,22 @@ public class PlayerCharacterController : MonoBehaviour
         velocity = Vector3.zero;
     }
 
+    public void TeleportTo(Vector3 pos, Quaternion rot)
+    {
+        controller.enabled = false;
+        transform.position = pos;
+    
+        // SINCRONIZZAZIONE ROTAZIONE
+        yaw = rot.eulerAngles.y;
+        transform.rotation = Quaternion.Euler(0, yaw, 0);
+    
+        pitch = 0; 
+        if (view != null) view.localRotation = Quaternion.Euler(0, 0, 0);
+
+        controller.enabled = true;
+        velocity = Vector3.zero;
+    }
+    
     // --- MASK API ---
     public void ApplyMask(MaskAbilityConfig cfg)
     {
