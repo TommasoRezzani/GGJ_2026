@@ -26,7 +26,7 @@ MonoBehaviour:
   fOniChargeDelay: 0.4
   fOniChargeRate: 0.75
   fOniMaxSpeedMultiplier: 2.5
-  fOniDissipateRate: 1.2
+  fOniDissipateRate: 0.5
   fOniSlideFactor: 3
   bOniEnableMomentumJump: 1
   fOniMomentumJumpMultiplier: 1.5
