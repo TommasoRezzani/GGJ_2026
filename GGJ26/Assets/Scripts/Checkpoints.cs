@@ -6,51 +6,45 @@ public class Checkpoint : MonoBehaviour
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private AudioClip activationSound;
 
-    // Variabile per evitare che il suono si ripeta all'infinito se ci stai dentro
+    // Variabile di stato: una volta diventata true, non tornerà mai più false
     private bool hasPlayed = false; 
 
     private void Start()
     {
-        // Se ti dimentichi di trascinare l'AudioSource, prova a prenderlo da solo
         if (audioSource == null) audioSource = GetComponent<AudioSource>();
     }
 
     private void OnTriggerEnter(Collider other)
     {
+        // Controlliamo se è il player E se il suono non è già stato suonato
         if (other.CompareTag("Player"))
         {
-            // FIX: Dobbiamo prendere il componente DAL player che ci ha toccato
             PlayerCharacterController playerScript = other.GetComponent<PlayerCharacterController>();
 
             if (playerScript != null)
             {
-                // 1. Salviamo la posizione
-                playerScript.SetRespawnPoint(transform.position, transform.rotation);
-                Debug.Log("Checkpoint Attivato!");
-
-                // 2. Suoniamo il feedback audio (solo se non sta già suonando)
-                PlayActivationSound();
+                // 1. Salviamo SEMPRE la posizione (utile se vuoi aggiornare lo spawn point ripassandoci)
+                playerScript.SetRespawnPoint(transform.position);
+                
+                // 2. Gestione Suono "One Time Only"
+                if (!hasPlayed)
+                {
+                    PlayActivationSound();
+                    Debug.Log("Checkpoint Attivato per la prima volta!");
+                }
             }
         }
     }
 
-    // Opzionale: Se vuoi che il checkpoint suoni ogni volta che ci ripassi, 
-    // togli il controllo "!hasPlayed". 
-    // Se vuoi che suoni una volta sola per partita, lascia così.
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            hasPlayed = false; // Resettiamo così se torna indietro suona di nuovo
-        }
-    }
+    // Ho RIMOSSO OnTriggerExit. 
+    // Ora 'hasPlayed' rimane true per sempre finché non ricarichi la scena.
 
     private void PlayActivationSound()
     {
-        if (audioSource != null && activationSound != null && !hasPlayed)
+        if (audioSource != null && activationSound != null)
         {
             audioSource.PlayOneShot(activationSound);
-            hasPlayed = true;
+            hasPlayed = true; // Blocchiamo il suono per il futuro
         }
     }
 }
