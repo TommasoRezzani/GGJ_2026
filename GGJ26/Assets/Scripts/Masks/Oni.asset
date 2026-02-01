@@ -13,22 +13,22 @@ MonoBehaviour:
   m_Name: Oni
   m_EditorClassIdentifier: Assembly-CSharp::MaskAbilityConfig
   maskType: 2
-  moveSpeed: 6
-  jumpForce: 0
-  maxJumps: 2
+  moveSpeed: -1
+  jumpForce: -1
+  maxJumps: 1
   gravity: -9999
-  airFriction: -30
-  groundFriction: 25.17
-  dashSpeed: 86.2
-  dashCooldown: 4
-  bYukiEnableSecondJump: 1
-  fYukiSecondJumpForce: 12
+  airFriction: -1
+  groundFriction: -1
+  dashSpeed: -1
+  dashCooldown: -1
+  bYukiEnableSecondJump: 0
+  fYukiSecondJumpForce: 0
   fOniChargeDelay: 0.4
-  fOniChargeRate: 0.6
-  fOniMaxSpeedMultiplier: 2.8
-  fOniDissipateRate: 1.2
+  fOniChargeRate: 0.75
+  fOniMaxSpeedMultiplier: 2.5
+  fOniDissipateRate: 0.5
   fOniSlideFactor: 3
   bOniEnableMomentumJump: 1
   fOniMomentumJumpMultiplier: 1.5
   wallTag: Wall
-  fOniMaxSpeedThreshold01: 0.8556
+  fOniMaxSpeedThreshold01: 0.8
