@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System; // Fondamentale per Action
 using System.Collections;
 
 [RequireComponent(typeof(CharacterController))]
@@ -47,6 +48,24 @@ public class PlayerCharacterController : MonoBehaviour
     private MaskAbilityConfig activeMaskConfig;
     private float fDefaultMoveSpeed, fDefaultJumpForce, fDefaultGroundFriction, fDefaultAirFriction, fDefaultGravity;
     private int iDefaultMaxJumps;
+
+    // ------------------------------------------------------------------
+    // MODIFICHE QUI SOTTO (Eventi e Getter Pubblici corretti)
+    // ------------------------------------------------------------------
+
+    // Audio Managment
+    // Corretto: Action<bool> accetta il parametro true/false per il doppio salto
+    public event Action<bool> OnJump; 
+    public event Action<MaskType> OnMaskChanged;
+
+    // Getter Pubblici (Rinomimati per combaciare con PlayerAudioController)
+    // Ho tolto i prefissi 'b' e 'f' dai nomi pubblici per risolvere gli errori CS1061
+    public bool IsGrounded => controller.isGrounded;
+    public float CurrentSpeed => new Vector3(velocity.x, 0, velocity.z).magnitude;
+    public bool IsOniSprinting => fOniCurrentMultiplier > 1.1f;
+    public MaskType CurrentMask => activeMaskConfig != null ? activeMaskConfig.maskType : MaskType.Default;
+
+    // ------------------------------------------------------------------
 
     private void Awake()
     {
@@ -191,10 +210,15 @@ public class PlayerCharacterController : MonoBehaviour
 
         if (Keyboard.current.spaceKey.wasPressedThisFrame)
         {
+            bool jumpSuccess = false;
+            bool isDoubleJump = false;
+
             if (controller.isGrounded)
             {
                 velocity.y = fJumpForce;
                 iJumpsRemaining--;
+                jumpSuccess = true;
+                isDoubleJump = false;
 
                 if (activeMaskConfig != null && activeMaskConfig.maskType == MaskType.Oni && fOniCurrentMultiplier > 1.1f)
                 {
@@ -206,7 +230,11 @@ public class PlayerCharacterController : MonoBehaviour
             {
                 velocity.y = activeMaskConfig.fYukiSecondJumpForce;
                 bYukiSecondJumpAvailable = false;
+                jumpSuccess = true;
+                isDoubleJump = true;
             }
+
+            if (jumpSuccess) OnJump?.Invoke(isDoubleJump);
         }
     }
 
@@ -228,11 +256,16 @@ public class PlayerCharacterController : MonoBehaviour
     {
         activeMaskConfig = cfg;
         SetDefaultStats();
+        
+        // CORREZIONE: Qui applichiamo anche l'evento cambio maschera
         if (cfg == null) return;
         if (cfg.moveSpeed > 0) fMoveSpeed = cfg.moveSpeed;
         if (cfg.jumpForce > 0) fJumpForce = cfg.jumpForce;
         if (cfg.maxJumps >= 0) iMaxJumps = cfg.maxJumps;
         iJumpsRemaining = iMaxJumps;
+
+        // Notifica il cambio maschera all'audio
+        OnMaskChanged?.Invoke(cfg.maskType);
     }
 
     public void SetDefaultStats()
