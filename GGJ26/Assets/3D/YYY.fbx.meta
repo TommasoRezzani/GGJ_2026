@@ -8,7 +8,7 @@ ModelImporter:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: yukii_mask_rig_unwrapChekcerShader
-    second: {fileID: 2100000, guid: 2d8ac7e276f504630b2a7be0184556f4, type: 2}
+    second: {fileID: 2100000, guid: c874f94d8f71f4835bebea2ba9382393, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

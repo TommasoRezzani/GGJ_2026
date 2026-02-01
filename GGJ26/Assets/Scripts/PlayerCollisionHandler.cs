@@ -4,6 +4,7 @@ public class PlayerCollisionHandler : MonoBehaviour
 {
     private PlayerCharacterController moveController;
     private Vector3 lastCheckpointPosition;
+    private Quaternion lastCheckpointRotation;
 
     void Start()
     {
@@ -11,6 +12,9 @@ public class PlayerCollisionHandler : MonoBehaviour
 
         // Last position setted for lastCheckpoint
         lastCheckpointPosition = transform.position;
+        moveController = GetComponent<PlayerCharacterController>();
+        lastCheckpointPosition = transform.position;
+        lastCheckpointRotation = transform.rotation;
     }
 
     // -------------------
@@ -33,6 +37,7 @@ public class PlayerCollisionHandler : MonoBehaviour
         if (other.CompareTag("Respawn"))
         {
             lastCheckpointPosition = other.transform.position;
+            lastCheckpointRotation = other.transform.rotation;
             Debug.Log("Checkpoint Salvato!");
         }
 
@@ -48,7 +53,7 @@ public class PlayerCollisionHandler : MonoBehaviour
     {
         if (moveController != null)
         {
-            moveController.TeleportTo(lastCheckpointPosition);
+            moveController.TeleportTo(lastCheckpointPosition, lastCheckpointRotation);
         }
     }
 }

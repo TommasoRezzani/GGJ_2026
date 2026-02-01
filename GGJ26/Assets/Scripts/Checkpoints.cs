@@ -25,7 +25,7 @@ public class Checkpoint : MonoBehaviour
             if (playerScript != null)
             {
                 // 1. Salviamo la posizione
-                playerScript.SetRespawnPoint(transform.position);
+                playerScript.SetRespawnPoint(transform.position, transform.rotation);
                 Debug.Log("Checkpoint Attivato!");
 
                 // 2. Suoniamo il feedback audio (solo se non sta già suonando)
