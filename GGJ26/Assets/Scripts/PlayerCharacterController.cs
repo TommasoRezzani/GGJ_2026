@@ -331,7 +331,7 @@ public class PlayerCharacterController : MonoBehaviour
     {
         if (Mouse.current == null || view == null) return;
         Vector2 delta = Mouse.current.delta.ReadValue();
-        float sensitivity = MouseSensitivityController.fMouseSensitivity > 0 ? MouseSensitivityController.fMouseSensitivity : 0.01f;
+        float sensitivity = MouseSensitivityController.fMouseSensitivity > 0 ? MouseSensitivityController.fMouseSensitivity : 0.16f;
         yaw += delta.x * sensitivity;
         pitch = Mathf.Clamp(pitch - delta.y * sensitivity, fPitchMin, fPitchMax);
         transform.rotation = Quaternion.Euler(0, yaw, 0);
