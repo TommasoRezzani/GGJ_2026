@@ -13,16 +13,16 @@ MonoBehaviour:
   m_Name: Yuki
   m_EditorClassIdentifier: Assembly-CSharp::MaskAbilityConfig
   maskType: 1
-  moveSpeed: 8
-  jumpForce: 7
+  moveSpeed: -1
+  jumpForce: -1
   maxJumps: 2
-  gravity: -22
-  airFriction: 5
+  gravity: -1
+  airFriction: -5.06
   groundFriction: -1
   dashSpeed: -1
   dashCooldown: -1
   bYukiEnableSecondJump: 1
-  fYukiSecondJumpForce: 13
+  fYukiSecondJumpForce: 10
   fOniChargeDelay: 0.5
   fOniChargeRate: 0.5
   fOniMaxSpeedMultiplier: 2.5
