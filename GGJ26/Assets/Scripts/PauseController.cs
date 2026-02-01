@@ -1,37 +1,42 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.UI;
+using UnityEngine.InputSystem; // Fondamentale per il New Input System
 
 public class PauseController : MonoBehaviour
 {
     [Header("UI References")]
-    [Tooltip("Trascina qui il GameObject 'Canvas Settings' o il pannello che vuoi aprire")]
+    [Tooltip("Trascina qui il GameObject 'SettingsCanvas' o il pannello nero di sfondo")]
     [SerializeField] private GameObject settingsPanel;
 
     [Header("Player Reference")]
-    [Tooltip("Trascina qui il Player per bloccare i controlli")]
+    [Tooltip("Trascina qui il Player dalla scena")]
     [SerializeField] private PlayerCharacterController playerController;
 
+    // Stato interno
     private bool isPaused = false;
 
     void Start()
-{
-    // Assicuriamoci che il menu sia chiuso all'inizio
-    if (settingsPanel != null)
     {
-        settingsPanel.SetActive(false);
+        // All'avvio, assicuriamoci che il menu sia nascosto e il tempo scorra
+        if (settingsPanel != null)
+        {
+            settingsPanel.SetActive(false);
+        }
+        Time.timeScale = 1f;
     }
-}
 
     void Update()
     {
-        // Controlla input ESC o P
+        // Controlla se la tastiera è collegata prima di leggere l'input
+        if (Keyboard.current == null) return;
+
+        // Se premi ESC o P -> Attiva/Disattiva pausa
         if (Keyboard.current.escapeKey.wasPressedThisFrame || Keyboard.current.pKey.wasPressedThisFrame)
         {
             TogglePause();
         }
     }
 
+    // Funzione pubblica: utile se vuoi richiamare la pausa anche da un tasto UI
     public void TogglePause()
     {
         isPaused = !isPaused;
@@ -48,37 +53,45 @@ public class PauseController : MonoBehaviour
 
     private void PauseGame()
     {
-        // 1. Ferma il tempo (fisica e animazioni)
+        // 1. Ferma il tempo
         Time.timeScale = 0.0001f;
 
-        // 2. Mostra la UI
+        // 2. Mostra il Menu Opzioni
         if (settingsPanel != null) settingsPanel.SetActive(true);
 
-        // 3. Disabilita controlli player e sblocca il mouse
+        // 3. Blocca il Player e SBLOCCA il Cursore
         if (playerController != null)
         {
-            //TODO playerController.SetGameplayControl(false);
+            // False = Non siamo in gameplay -> Cursore visibile, Player fermo
+            playerController.SetGameplayControl(false);
         }
     }
 
     public void ResumeGame()
     {
-        // 1. Ripristina il tempo
+        isPaused = false; // Sicurezza per allineare lo stato
+
+        // 1. Ripristina il tempo normale
         Time.timeScale = 1f;
 
-        // 2. Nascondi la UI
+        // 2. Nascondi il Menu Opzioni
         if (settingsPanel != null) settingsPanel.SetActive(false);
 
-        // 3. Riabilita controlli player e blocca il mouse
+        // 3. Sblocca il Player e BLOCCA il Cursore
         if (playerController != null)
         {
-            //TODO playerController.SetGameplayControl(true);
+            // True = Siamo in gameplay -> Cursore nascosto, Player si muove
+            playerController.SetGameplayControl(true);
         }
     }
     
-    // Funzione utile da collegare al tasto "Back" o "Close" dentro il menu Settings
+    // COLLEGA QUESTA FUNZIONE AL TASTO "BACK" NELL'INSPECTOR DI UNITY
     public void CloseMenuButton()
     {
-        if(isPaused) TogglePause();
+        // Funziona solo se il gioco è effettivamente in pausa
+        if (isPaused) 
+        {
+            TogglePause();
+        }
     }
 }

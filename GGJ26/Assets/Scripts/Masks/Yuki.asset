@@ -12,23 +12,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0e1d4f9e4514a7da45a76b1aee6b639, type: 3}
   m_Name: Yuki
   m_EditorClassIdentifier: Assembly-CSharp::MaskAbilityConfig
-  maskType: 0
-  moveSpeed: -1
-  jumpForce: -1
-  maxJumps: -1
-  gravity: -9999
-  airFriction: -1
+  maskType: 1
+  moveSpeed: 8
+  jumpForce: 7
+  maxJumps: 2
+  gravity: -22
+  airFriction: 5
   groundFriction: -1
-  dashSpeed: 5
-  dashCooldown: 1
-  yukiEnableZeroGravity: 0
-  yukiZeroGravityDuration: 2
-  oniInfiniteDash: 0
-  oniResetDelayAfterSpace: 1
-  oniRecoveryDuration: 2
-  oniWallStunSeconds: 1
+  dashSpeed: -1
+  dashCooldown: -1
+  bYukiEnableSecondJump: 1
+  fYukiSecondJumpForce: 13
+  fOniChargeDelay: 0.5
+  fOniChargeRate: 0.5
+  fOniMaxSpeedMultiplier: 2.5
+  fOniDissipateRate: 1
+  fOniSlideFactor: 2
+  bOniEnableMomentumJump: 1
+  fOniMomentumJumpMultiplier: 1.2
   wallTag: Wall
-  bOniJumpScaleWithSpeed: 0
-  fOniJumpMinMultiplier: 1
-  fOniJumpMaxMultiplier: 1.6
-  fOniSpeedForMaxJump: 25
+  fOniMaxSpeedThreshold01: 0.95
