@@ -2,17 +2,33 @@ using UnityEngine;
 
 public class FlameWallController : MonoBehaviour
 {
-    [SerializeField] private float minSpeedToPass = 15f;
+    [Header("Settings")]
+    [Tooltip("Velocità minima per passare (es. 15 se Oni corre a 20)")]
+    [SerializeField] private float minSpeedToPass = 15f; 
 
-    [SerializeField] private Collider solidCollider;
+    [Header("Audio")]
+    [SerializeField] private AudioSource wallAudioSource;
+    [SerializeField] private AudioClip successClip;
+    [SerializeField] private AudioClip failClip;
+    
+    // Riferimenti interni (li troviamo in automatico)
+    private Collider myCollider;
+    private Renderer myRenderer;
 
-    [SerializeField] private Renderer flameRenderer;
-    private MaskAbilityConfig activeMaskConfig;
-
-    // [SerializeField] private ParticleSystem futureFlameParticles; // Da collegare in futuro
+    // Cooldown per non spammare il suono di errore
+    private float lastFailTime = 0f;
+    private float failCooldown = 1.0f;
 
     private void Start()
     {
+        // AUTO-SETUP: Ci prendiamo i componenti da soli
+        myCollider = GetComponent<Collider>();
+        myRenderer = GetComponent<Renderer>();
+
+        // Sicurezza: se manca l'AudioSource ma lo script è su un oggetto che ne ha uno
+        if (wallAudioSource == null)
+            wallAudioSource = GetComponent<AudioSource>();
+
         SetWallActive(true);
     }
 
@@ -24,19 +40,36 @@ public class FlameWallController : MonoBehaviour
 
             if (playerScript != null)
             {
-                // Confrontiamo la tua variabile fMoveSpeed con il limite del muro
-                if (activeMaskConfig.moveSpeed >= minSpeedToPass)
+                // Leggiamo la velocità dal Player (grazie alle modifiche fatte prima)
+                float currentSpeed = playerScript.CurrentSpeed; 
+
+                if (currentSpeed >= minSpeedToPass)
                 {
-                    SetWallActive(false); // PASSAGGIO APERTO
+                    // --- SUCCESSO ---
+                    // Se il collider è ancora attivo, vuol dire che lo stiamo aprendo ora
+                    if (myCollider != null && myCollider.enabled)
+                    {
+                        PlaySound(successClip);
+                        SetWallActive(false); // Nascondi e Disattiva
+                    }
                 }
                 else
                 {
-                    SetWallActive(true);  // PASSAGGIO CHIUSO
+                    // --- FALLIMENTO ---
+                    // Il PlayerCharacterController gestirà il rimbalzo fisico.
+                    // Noi gestiamo solo il suono "BONK".
+                    
+                    if (Time.time > lastFailTime + failCooldown)
+                    {
+                        PlaySound(failClip);
+                        lastFailTime = Time.time;
+                    }
                 }
             }
         }
     }
 
+    // Funzione per riattivare il muro quando il giocatore esce dalla zona (per reset o respawn)
     private void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("Player"))
@@ -47,13 +80,16 @@ public class FlameWallController : MonoBehaviour
 
     private void SetWallActive(bool isActive)
     {
-        // 1. Gestione Collider Fisico
-        if (solidCollider != null) solidCollider.enabled = isActive;
+        // Disattiva il trigger (così non suona più) e la grafica
+        if (myCollider != null) myCollider.enabled = isActive;
+        if (myRenderer != null) myRenderer.enabled = isActive;
+    }
 
-        // 2. Gestione Visiva (Texture)
-        // Se il muro è attivo (isActive = true), mostriamo la texture. 
-        // Se è disattivo (passi), la nascondiamo.
-        if (flameRenderer != null) flameRenderer.enabled = isActive;
-        
+    private void PlaySound(AudioClip clip)
+    {
+        if (wallAudioSource != null && clip != null)
+        {
+            wallAudioSource.PlayOneShot(clip);
+        }
     }
 }
