@@ -3,53 +3,67 @@ using UnityEngine.SceneManagement;
 
 public class MainMenuController : MonoBehaviour
 {
-    [Header("UI References")]
-    // Trascina qui il pannello del Pop-up creato nella UI
+    [Header("Panels References")]
+    [Tooltip("Il pannello nero delle Impostazioni (SettingsCanvas)")]
+    [SerializeField] private GameObject settingsPanel;
+    
+    [Tooltip("Il pannello di conferma uscita (QuitConfirmation)")]
     [SerializeField] private GameObject quitConfirmationPanel;
+
+    [Tooltip("Il contenitore dei bottoni principali (Play, Settings, Quit) se vuoi nasconderli")]
+    [SerializeField] private GameObject mainButtonsContainer; 
 
     private void Start()
     {
-        // Assicuriamoci che il pop-up sia chiuso all'avvio
-        if (quitConfirmationPanel != null)
-        {
-            quitConfirmationPanel.SetActive(false);
-        }
+        // 1. All'avvio, NASCONDIAMO forzatamente i pannelli extra
+        if (settingsPanel != null) settingsPanel.SetActive(false);
+        if (quitConfirmationPanel != null) quitConfirmationPanel.SetActive(false);
+        
+        // 2. Mostriamo i bottoni principali
+        if (mainButtonsContainer != null) mainButtonsContainer.SetActive(true);
     }
 
     public void StartGame()
     {
+        // Ferma la musica (se usi il sistema singleton)
+        if (BackgroundMusicController.Instance != null)
+        {
+            BackgroundMusicController.Instance.StopMusic();
+        }
+        
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
     }
 
+    // --- GESTIONE SETTINGS (PANNELLO) ---
     public void OpenSettings()
     {
-        SceneManager.LoadScene("SettingsScene");
+        // Invece di caricare una scena, attiviamo il pannello che hai già lì
+        if (settingsPanel != null) settingsPanel.SetActive(true);
+        
+        // Opzionale: nascondi i tasti del menu sotto per pulizia
+        if (mainButtonsContainer != null) mainButtonsContainer.SetActive(false);
     }
 
-    // --- NUOVE FUNZIONI PER IL POP-UP ---
+    public void CloseSettings() // Collega questo al tasto "Back" dentro Settings
+    {
+        if (settingsPanel != null) settingsPanel.SetActive(false);
+        if (mainButtonsContainer != null) mainButtonsContainer.SetActive(true);
+    }
 
-    // 1. Collegare questo al tasto "Quit" del Menu Principale
+    // --- GESTIONE QUIT POP-UP ---
     public void ShowQuitConfirmation()
     {
-        if (quitConfirmationPanel != null)
-        {
-            quitConfirmationPanel.SetActive(true); // Mostra il pop-up
-        }
+        if (quitConfirmationPanel != null) quitConfirmationPanel.SetActive(true);
     }
 
-    // 2. Collegare questo al tasto "Yes" del Pop-up
     public void ConfirmQuit()
     {
         Application.Quit();
-        Debug.Log("Player has quit the game.");
+        Debug.Log("Quit");
     }
 
-    // 3. Collegare questo al tasto "No" del Pop-up
     public void CancelQuit()
     {
-        if (quitConfirmationPanel != null)
-        {
-            quitConfirmationPanel.SetActive(false); // Nasconde il pop-up
-        }
+        if (quitConfirmationPanel != null) quitConfirmationPanel.SetActive(false);
     }
 }
