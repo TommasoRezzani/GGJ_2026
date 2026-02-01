@@ -1,2 +1,14 @@
 fileFormatVersion: 2
 guid: 1c23dfdbf03ba3547b1fec7a54be8223
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - wallAudioSource: {instanceID: 0}
+  - successClip: {fileID: 8300000, guid: b2902eca9dfbdba4da209f317e5df26d, type: 3}
+  - failClip: {fileID: 8300000, guid: 4a63935e7bdd8ee46a3146670e99beae, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

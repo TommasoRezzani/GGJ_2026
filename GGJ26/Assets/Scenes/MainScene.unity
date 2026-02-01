@@ -12233,7 +12233,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2295401780751087624, guid: 1a0bb21f63380fb4cb8839ffe425ec97, type: 3}
       propertyPath: m_text
-      value: Don't fear the Fire
+      value: Become a Wrecking Ball
       objectReference: {fileID: 0}
     - target: {fileID: 2295401780751087624, guid: 1a0bb21f63380fb4cb8839ffe425ec97, type: 3}
       propertyPath: m_fontSize
