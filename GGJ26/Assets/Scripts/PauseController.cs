@@ -1,14 +1,16 @@
 using UnityEngine;
-using UnityEngine.InputSystem; // Fondamentale per il New Input System
+using UnityEngine.InputSystem; 
 
 public class PauseController : MonoBehaviour
 {
-    [Header("UI References")]
-    [Tooltip("Trascina qui il GameObject 'SettingsCanvas' o il pannello nero di sfondo")]
+    [Header("UI Panels")]
+    [Tooltip("Il pannello delle Impostazioni (Slider, ecc.)")]
     [SerializeField] private GameObject settingsPanel;
 
-    [Header("Player Reference")]
-    [Tooltip("Trascina qui il Player dalla scena")]
+    [Tooltip("Il pannello piccolo 'Vuoi Uscire?'")]
+    [SerializeField] private GameObject quitConfirmationPanel;
+
+    [Header("References")]
     [SerializeField] private PlayerCharacterController playerController;
 
     // Stato interno
@@ -16,82 +18,114 @@ public class PauseController : MonoBehaviour
 
     void Start()
     {
-        // All'avvio, assicuriamoci che il menu sia nascosto e il tempo scorra
-        if (settingsPanel != null)
-        {
-            settingsPanel.SetActive(false);
-        }
+        // All'avvio nascondiamo tutto e sblocchiamo il tempo
+        if (settingsPanel != null) settingsPanel.SetActive(false);
+        if (quitConfirmationPanel != null) quitConfirmationPanel.SetActive(false);
+        
         Time.timeScale = 1f;
+        isPaused = false;
     }
 
     void Update()
     {
-        // Controlla se la tastiera è collegata prima di leggere l'input
         if (Keyboard.current == null) return;
 
-        // Se premi ESC o P -> Attiva/Disattiva pausa
-        if (Keyboard.current.escapeKey.wasPressedThisFrame || Keyboard.current.pKey.wasPressedThisFrame)
+        // --- TASTO P: Apre/Chiude SETTINGS ---
+        if (Keyboard.current.pKey.wasPressedThisFrame)
         {
-            TogglePause();
+            // Se il pannello Quit è aperto, lo chiudiamo prima di aprire Settings
+            if (quitConfirmationPanel.activeSelf) 
+            {
+                CloseAllPanels();
+                TogglePause(settingsPanel);
+            }
+            else
+            {
+                TogglePause(settingsPanel);
+            }
+        }
+
+        // --- TASTO ESC: Apre/Chiude QUIT POPUP ---
+        if (Keyboard.current.escapeKey.wasPressedThisFrame)
+        {
+            // Se il pannello Settings è aperto, lo chiudiamo prima di aprire Quit
+            if (settingsPanel.activeSelf)
+            {
+                CloseAllPanels();
+                TogglePause(quitConfirmationPanel);
+            }
+            else
+            {
+                TogglePause(quitConfirmationPanel);
+            }
         }
     }
 
-    // Funzione pubblica: utile se vuoi richiamare la pausa anche da un tasto UI
-    public void TogglePause()
+    // Logica centrale per gestire la pausa e mostrare UN pannello specifico
+    private void TogglePause(GameObject panelToOpen)
     {
-        isPaused = !isPaused;
+        // Se il pannello richiesto è già aperto, stiamo "riprendendo" il gioco
+        bool isClosing = panelToOpen.activeSelf;
 
-        if (isPaused)
-        {
-            PauseGame();
-        }
-        else
+        if (isClosing)
         {
             ResumeGame();
         }
+        else
+        {
+            PauseGame(panelToOpen);
+        }
     }
 
-    private void PauseGame()
+    private void PauseGame(GameObject panelToShow)
     {
-        // 1. Ferma il tempo
-        Time.timeScale = 0.0001f;
+        isPaused = true;
+        Time.timeScale = 0.0001f; // Ferma il tempo
 
-        // 2. Mostra il Menu Opzioni
-        if (settingsPanel != null) settingsPanel.SetActive(true);
+        // Attiva solo il pannello richiesto
+        if (panelToShow != null) panelToShow.SetActive(true);
 
-        // 3. Blocca il Player e SBLOCCA il Cursore
-        if (playerController != null)
-        {
-            // False = Non siamo in gameplay -> Cursore visibile, Player fermo
-            playerController.SetGameplayControl(false);
-        }
+        // Sblocca il cursore
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
+        // Blocca i movimenti del player
+        if (playerController != null) playerController.SetGameplayControl(false);
     }
 
     public void ResumeGame()
     {
-        isPaused = false; // Sicurezza per allineare lo stato
+        isPaused = false;
+        Time.timeScale = 1f; // Riparte il tempo
 
-        // 1. Ripristina il tempo normale
-        Time.timeScale = 1f;
+        // Chiude TUTTI i pannelli per sicurezza
+        CloseAllPanels();
 
-        // 2. Nascondi il Menu Opzioni
-        if (settingsPanel != null) settingsPanel.SetActive(false);
+        // Blocca il cursore e riattiva il player
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
 
-        // 3. Sblocca il Player e BLOCCA il Cursore
-        if (playerController != null)
-        {
-            // True = Siamo in gameplay -> Cursore nascosto, Player si muove
-            playerController.SetGameplayControl(true);
-        }
+        if (playerController != null) playerController.SetGameplayControl(true);
     }
-    
-    // COLLEGA QUESTA FUNZIONE AL TASTO "BACK" NELL'INSPECTOR DI UNITY
-    public void CloseMenuButton()
+
+    private void CloseAllPanels()
     {
-        // Funziona solo se il gioco è effettivamente in pausa
-        if (isPaused) 
-        {
-            TogglePause();
-        }
+        if (settingsPanel != null) settingsPanel.SetActive(false);
+        if (quitConfirmationPanel != null) quitConfirmationPanel.SetActive(false);
+    }
+
+    // --- FUNZIONI PER I BOTTONI UI (Da collegare nell'Inspector) ---
+    
+    // Collega al tasto "NO" o "Resume"
+    public void ButtonResume() 
+    {
+        ResumeGame();
+    }
+
+    // Collega al tasto "YES" o "Quit Game"
+    public void ButtonQuitGame()
+    {
+        Debug.Log("Uscita dal gioco...");
+        Application.Quit();
     }
 }

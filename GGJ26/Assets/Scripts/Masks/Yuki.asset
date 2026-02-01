@@ -22,7 +22,7 @@ MonoBehaviour:
   dashSpeed: -1
   dashCooldown: -1
   bYukiEnableSecondJump: 1
-  fYukiSecondJumpForce: 11
+  fYukiSecondJumpForce: 13
   fOniChargeDelay: 0.5
   fOniChargeRate: 0.5
   fOniMaxSpeedMultiplier: 2.5

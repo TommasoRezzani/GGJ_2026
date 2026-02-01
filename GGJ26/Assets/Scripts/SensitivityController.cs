@@ -15,7 +15,7 @@ public class MouseSensitivityController : MonoBehaviour
 
     void Start()
     {
-        // Recupera il valore salvato 
+        // Recupera il valore salvato (default 2.0)
         fMouseSensitivity = PlayerPrefs.GetFloat("MouseSensitivity", 0.16f);
         
         // Controllo di sicurezza: se ti sei dimenticato di trascinare lo slider, non crasha

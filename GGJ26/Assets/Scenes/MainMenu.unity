@@ -2395,7 +2395,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: c99ef17c6d98e4e4fb67b88ced1c1547, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 1
+  m_Volume: 0.5
   m_Pitch: 1
   Loop: 1
   Mute: 0
@@ -4010,7 +4010,7 @@ MonoBehaviour:
   m_MinValue: 1
   m_MaxValue: 10
   m_WholeNumbers: 0
-  m_Value: 2.52
+  m_Value: 1
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []

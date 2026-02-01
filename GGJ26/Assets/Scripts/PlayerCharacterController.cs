@@ -141,7 +141,7 @@ public class PlayerCharacterController : MonoBehaviour
         Vector3 bounceDirection = (transform.position - wall.transform.position).normalized;
         bounceDirection.y = 0;
 
-        float bounceForce = fMoveSpeed * 1.5f;
+        float bounceForce = fMoveSpeed * 3.0f;
         velocity = bounceDirection * bounceForce;
         velocity.y = fJumpForce * 0.4f;
 
@@ -331,8 +331,9 @@ public class PlayerCharacterController : MonoBehaviour
     {
         if (Mouse.current == null || view == null) return;
         Vector2 delta = Mouse.current.delta.ReadValue();
-        yaw += delta.x * 0.1f;
-        pitch = Mathf.Clamp(pitch - delta.y * 0.1f, fPitchMin, fPitchMax);
+        float sensitivity = MouseSensitivityController.fMouseSensitivity > 0 ? MouseSensitivityController.fMouseSensitivity : 0.16f;
+        yaw += delta.x * sensitivity;
+        pitch = Mathf.Clamp(pitch - delta.y * sensitivity, fPitchMin, fPitchMax);
         transform.rotation = Quaternion.Euler(0, yaw, 0);
         view.localRotation = Quaternion.Euler(pitch, 0, 0);
     }
