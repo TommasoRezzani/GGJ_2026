@@ -19,8 +19,8 @@ MonoBehaviour:
   gravity: -9999
   airFriction: -1
   groundFriction: -1
-  dashSpeed: -1
-  dashCooldown: -1
+  dashSpeed: 5
+  dashCooldown: 1
   yukiEnableZeroGravity: 0
   yukiZeroGravityDuration: 2
   oniInfiniteDash: 0
@@ -28,3 +28,7 @@ MonoBehaviour:
   oniRecoveryDuration: 2
   oniWallStunSeconds: 1
   wallTag: Wall
+  bOniJumpScaleWithSpeed: 0
+  fOniJumpMinMultiplier: 1
+  fOniJumpMaxMultiplier: 1.6
+  fOniSpeedForMaxJump: 25

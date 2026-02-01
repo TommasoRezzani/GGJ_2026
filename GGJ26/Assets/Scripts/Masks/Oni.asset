@@ -13,18 +13,22 @@ MonoBehaviour:
   m_Name: Oni
   m_EditorClassIdentifier: Assembly-CSharp::MaskAbilityConfig
   maskType: 2
-  moveSpeed: 20
-  jumpForce: 20
-  maxJumps: 2
-  gravity: -9999
-  airFriction: -30
-  groundFriction: 25.17
-  dashSpeed: 86.2
-  dashCooldown: 4
+  moveSpeed: -1
+  jumpForce: -1
+  maxJumps: -1
+  gravity: -1
+  airFriction: -1
+  groundFriction: -1
+  dashSpeed: -1
+  dashCooldown: -1
   yukiEnableZeroGravity: 0
   yukiZeroGravityDuration: 2
-  oniInfiniteDash: 0
+  oniInfiniteDash: 1
   oniResetDelayAfterSpace: 1
   oniRecoveryDuration: 2
   oniWallStunSeconds: 1
   wallTag: Wall
+  bOniJumpScaleWithSpeed: 0
+  fOniJumpMinMultiplier: 1
+  fOniJumpMaxMultiplier: 1.6
+  fOniSpeedForMaxJump: 25
