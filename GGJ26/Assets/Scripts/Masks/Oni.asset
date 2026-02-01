@@ -31,4 +31,4 @@ MonoBehaviour:
   bOniEnableMomentumJump: 1
   fOniMomentumJumpMultiplier: 1.5
   wallTag: Wall
-  fOniMaxSpeedThreshold01: 0.92
+  fOniMaxSpeedThreshold01: 0.8556

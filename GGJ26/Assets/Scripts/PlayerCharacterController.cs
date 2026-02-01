@@ -141,7 +141,7 @@ public class PlayerCharacterController : MonoBehaviour
         Vector3 bounceDirection = (transform.position - wall.transform.position).normalized;
         bounceDirection.y = 0;
 
-        float bounceForce = fMoveSpeed * 1.5f;
+        float bounceForce = fMoveSpeed * 3.0f;
         velocity = bounceDirection * bounceForce;
         velocity.y = fJumpForce * 0.4f;
 
