@@ -9,6 +9,7 @@ public class PlayerCharacterController : MonoBehaviour
     [Header("Look")] [SerializeField] private float fPitchMin = -80f;
     [SerializeField] private float fPitchMax = 80f;
     [SerializeField] private bool bIsGameplay = true;
+    [SerializeField] private GameObject camera;
 
     [Header("Movement (Base)")] [SerializeField]
     private float fMoveSpeed = 6f;

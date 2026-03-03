@@ -5,11 +5,13 @@ public class PlayerCollisionHandler : MonoBehaviour
     private PlayerCharacterController moveController;
     private Vector3 lastCheckpointPosition;
     private Quaternion lastCheckpointRotation;
+    private Rigidbody rb;
 
     void Start()
     {
         moveController = GetComponent<PlayerCharacterController>();
-
+        rb = GetComponent<Rigidbody>();
+        
         // Last position setted for lastCheckpoint
         lastCheckpointPosition = transform.position;
         moveController = GetComponent<PlayerCharacterController>();
@@ -53,6 +55,8 @@ public class PlayerCollisionHandler : MonoBehaviour
     {
         if (moveController != null)
         {
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
             moveController.TeleportTo(lastCheckpointPosition, lastCheckpointRotation);
         }
     }

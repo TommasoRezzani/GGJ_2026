@@ -621,6 +621,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PauseController
   settingsPanel: {fileID: 239491328}
+  quitConfirmationPanel: {fileID: 0}
   playerController: {fileID: 1894558932}
 --- !u!4 &230587588
 Transform:
@@ -1317,7 +1318,7 @@ GameObject:
   - component: {fileID: 922858647}
   m_Layer: 0
   m_Name: Cube
-  m_TagString: Wall
+  m_TagString: Kill
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3645,9 +3646,11 @@ GameObject:
   - component: {fileID: 1894558929}
   - component: {fileID: 1894558928}
   - component: {fileID: 1894558933}
+  - component: {fileID: 1894558936}
   - component: {fileID: 1894558935}
   - component: {fileID: 1894558932}
   - component: {fileID: 1894558934}
+  - component: {fileID: 1894558937}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -3769,6 +3772,7 @@ MonoBehaviour:
   fPitchMin: -80
   fPitchMax: 80
   bIsGameplay: 1
+  camera: {fileID: 0}
   fMoveSpeed: 6
   fJumpForce: 7
   iMaxJumps: 1
@@ -3833,6 +3837,46 @@ MonoBehaviour:
   iStartMaskIndex: 0
   kCycleMaskKey: 31
   bLogMaskChanges: 1
+--- !u!114 &1894558936
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1894558927}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d75323ffd47d6c429f0d4510983d116, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerVelocity
+  currentSpeed: 0
+--- !u!54 &1894558937
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1894558927}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &1983980665
 GameObject:
   m_ObjectHideFlags: 0
