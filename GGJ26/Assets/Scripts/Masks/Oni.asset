@@ -32,3 +32,5 @@ MonoBehaviour:
   fOniMomentumJumpMultiplier: 1.5
   wallTag: Wall
   fOniMaxSpeedThreshold01: 0.8
+  fov: 120
+  fovLerpSpeed: 8

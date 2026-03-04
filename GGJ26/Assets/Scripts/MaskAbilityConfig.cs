@@ -36,4 +36,9 @@ public class MaskAbilityConfig : ScriptableObject
     [Header("ONI - Wall Interaction")]
     public string wallTag = "Wall";
     [Range(0.8f, 1f)] public float fOniMaxSpeedThreshold01 = 0.95f; // Soglia per superare i muri (95% della velocità max)
+    
+    [Header("Camera")]
+    public float fov = -1f; // -1 = keep default
+    public float fovLerpSpeed = 8f; // opzionale (puoi anche tenerlo solo lato camera)
+    
 }

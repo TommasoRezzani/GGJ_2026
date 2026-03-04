@@ -31,7 +31,9 @@ public class PlayerMaskHandler : MonoBehaviour
 
     [Header("Debug")]
     [SerializeField] private bool bLogMaskChanges = false;
-
+    
+    [Header("Camera")]
+    [SerializeField] private CameraFovController cameraFov;
     // --------------------------------------------------
     // Runtime
     // --------------------------------------------------
@@ -72,6 +74,7 @@ public class PlayerMaskHandler : MonoBehaviour
 
         if (Keyboard.current[kCycleMaskKey].wasPressedThisFrame)
             CycleNextMask();
+        
     }
 
     // --------------------------------------------------
@@ -128,6 +131,7 @@ public class PlayerMaskHandler : MonoBehaviour
         {
             if (lMasks[i].goMaskObject != null)
                 lMasks[i].goMaskObject.SetActive(i == iIndex);
+
         }
 
         // ---------------------------
@@ -143,6 +147,16 @@ public class PlayerMaskHandler : MonoBehaviour
 
                 if (bLogMaskChanges)
                     Debug.Log($"[MaskHandler] Applied mask: {config.name} ({config.maskType})");
+                // ---------------------------
+                // Camera FOV
+                // ---------------------------
+                if (cameraFov != null)
+                {
+                    if (config != null && config.fov > 0f)
+                        cameraFov.SetFov(config.fov, config.fovLerpSpeed > 0 ? config.fovLerpSpeed : (float?)null);
+                    else
+                        cameraFov.ResetFov();
+                }
             }
             else
             {
@@ -173,4 +187,5 @@ public class PlayerMaskHandler : MonoBehaviour
 
         return lMasks[iCurrentMaskIndex].maskConfig;
     }
+    
 }

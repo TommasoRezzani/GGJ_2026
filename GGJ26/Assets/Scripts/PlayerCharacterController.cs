@@ -9,7 +9,6 @@ public class PlayerCharacterController : MonoBehaviour
     [Header("Look")] [SerializeField] private float fPitchMin = -80f;
     [SerializeField] private float fPitchMax = 80f;
     [SerializeField] private bool bIsGameplay = true;
-    [SerializeField] private GameObject camera;
 
     [Header("Movement (Base)")] [SerializeField]
     private float fMoveSpeed = 6f;
@@ -366,5 +365,16 @@ public class PlayerCharacterController : MonoBehaviour
     {
         Cursor.lockState = bIsGameplay ? CursorLockMode.Locked : CursorLockMode.None;
         Cursor.visible = !bIsGameplay;
+    }
+    
+    public void HardStop()
+    {
+        velocity = Vector3.zero;
+        fOniCurrentMultiplier = 1f;
+        fOniHoldShiftTime = 0f;
+
+        // reset moving platform state
+        activePlatform = null;
+        lastPlatformPosition = Vector3.zero;
     }
 }

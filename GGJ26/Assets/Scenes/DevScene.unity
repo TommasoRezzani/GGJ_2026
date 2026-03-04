@@ -2486,6 +2486,7 @@ GameObject:
   - component: {fileID: 1256734114}
   - component: {fileID: 1256734113}
   - component: {fileID: 1256734116}
+  - component: {fileID: 1256734117}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -2615,6 +2616,20 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!114 &1256734117
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1256734112}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a9a21d4b89c25540bc8cad83cc2b887, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  defaultFov: 70
+  lerpSpeed: 8
 --- !u!1 &1257015684
 GameObject:
   m_ObjectHideFlags: 0
@@ -3772,7 +3787,6 @@ MonoBehaviour:
   fPitchMin: -80
   fPitchMax: 80
   bIsGameplay: 1
-  camera: {fileID: 0}
   fMoveSpeed: 6
   fJumpForce: 7
   iMaxJumps: 1
@@ -3837,6 +3851,7 @@ MonoBehaviour:
   iStartMaskIndex: 0
   kCycleMaskKey: 31
   bLogMaskChanges: 1
+  cameraFov: {fileID: 1256734117}
 --- !u!114 &1894558936
 MonoBehaviour:
   m_ObjectHideFlags: 0

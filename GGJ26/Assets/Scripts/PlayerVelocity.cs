@@ -1,20 +1,19 @@
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(CharacterController))]
 public class PlayerVelocity : MonoBehaviour
 {
-    private Rigidbody rb;
+    private CharacterController cc;
 
-    [SerializeField] 
-    private float currentSpeed;   // Visibile in Inspector ma non modificabile esternamente
+    [SerializeField] private float currentSpeed;
 
-    void Awake()
+    void Awake() => cc = GetComponent<CharacterController>();
+
+    void Update()
     {
-        rb = GetComponent<Rigidbody>();
-    }
-
-    void FixedUpdate()
-    {
-        currentSpeed = rb.velocity.magnitude;
+        // Velocità reale calcolata dal CC
+        Vector3 v = cc.velocity;
+        v.y = 0f;
+        currentSpeed = v.magnitude;
     }
 }
