@@ -1,78 +1,95 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using System; // Fondamentale per Action
+using System; 
 using System.Collections;
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerCharacterController : MonoBehaviour
 {
-    [Header("Look")] [SerializeField] private float fPitchMin = -80f;
+    // ==========================================
+    // PRIVATE VARIABLES
+    // ==========================================
+    [Header("Input Setup")]
+    [SerializeField] private InputActionAsset iaInputAsset;
+
+    [Header("Look")] 
+    [SerializeField] private float fPitchMin = -80f;
     [SerializeField] private float fPitchMax = 80f;
     [SerializeField] private bool bIsGameplay = true;
 
-    [Header("Movement (Base)")] [SerializeField]
-    private float fMoveSpeed = 6f;
+    [Header("Movement (Base)")] 
+    [SerializeField] private float fMoveSpeed = 6f;
 
-    [Header("Jump (Base)")] [SerializeField]
-    private float fJumpForce = 8f;
+    [Header("Jump (Base)")] 
+    [SerializeField] private float fJumpForce = 8f;
 
     [SerializeField] private int iMaxJumps = 1;
 
-    [Header("Gravity (Base)")] [SerializeField]
-    private float fGravity = -25f;
+    [Header("Gravity (Base)")] 
+    [SerializeField] private float fGravity = -25f;
 
-    [Header("Friction (Base)")] [SerializeField]
-    private float fGroundFriction = 12f;
+    [Header("Friction (Base)")] 
+    [SerializeField] private float fGroundFriction = 12f;
 
     [SerializeField] private float fAirFriction = 3f;
 
-    [Header("References")] [SerializeField]
-    private Transform view;
+    [Header("References")] 
+    [SerializeField] private Transform tView;
 
-    private CharacterController controller;
+    private CharacterController cController;
     private Vector3 velocity;
-    private float yaw;
-    private float pitch;
+    private float fYaw;
+    private float fPitch;
     private int iJumpsRemaining;
-    private CameraShake cameraShakeScript;
+    private CameraShake csCameraShakeScript;
 
     // Respawn System
     private Vector3 currentRespawnPoint;
+    private Quaternion qCurrentRespawnRotation;
 
     // Oni Runtime
     private float fOniHoldShiftTime;
     private float fOniCurrentMultiplier = 1f;
-    private bool bIsStunned = false; // Impedisce l'input durante il rimbalzo
+    private bool bIsStunned = false; 
 
     // Yuki Runtime
     private bool bYukiSecondJumpAvailable;
 
-    private MaskAbilityConfig activeMaskConfig;
+    private MaskAbilityConfig macActiveMaskConfig;
     private float fDefaultMoveSpeed, fDefaultJumpForce, fDefaultGroundFriction, fDefaultAirFriction, fDefaultGravity;
     private int iDefaultMaxJumps;
+    
+    private Transform tActivePlatform;
+    private Vector3 lastPlatformPosition;
 
-    // ------------------------------------------------------------------
-    // MODIFICHE QUI SOTTO (Eventi e Getter Pubblici corretti)
-    // ------------------------------------------------------------------
+    private InputActionMap iamPlayerMap;
+    private InputAction iaMoveAction;
+    private InputAction iaLookAction;
+    private InputAction iaJumpAction;
+    private InputAction iaSprintAction;
 
-    // Audio Managment
-    // Corretto: Action<bool> accetta il parametro true/false per il doppio salto
+    // ==========================================
+    // PUBLIC VARIABLES E EVENTI
+    // ==========================================
     public event Action<bool> OnJump;
     public event Action<MaskType> OnMaskChanged;
 
-    // Getter Pubblici (Rinomimati per combaciare con PlayerAudioController)
-    // Ho tolto i prefissi 'b' e 'f' dai nomi pubblici per risolvere gli errori CS1061
-    public bool IsGrounded => controller.isGrounded;
+    public bool IsGrounded => cController != null && cController.isGrounded;
     public float CurrentSpeed => new Vector3(velocity.x, 0, velocity.z).magnitude;
     public bool IsOniSprinting => fOniCurrentMultiplier > 1.1f;
-    public MaskType CurrentMask => activeMaskConfig != null ? activeMaskConfig.maskType : MaskType.Default;
+    public MaskType CurrentMask => macActiveMaskConfig != null ? macActiveMaskConfig.maskType : MaskType.Default;
 
-    // ------------------------------------------------------------------
-
+    // ==========================================
+    // PRIVATE METHODS
+    // ==========================================
     private void Awake()
     {
-        controller = GetComponent<CharacterController>();
-        if (view != null) cameraShakeScript = view.GetComponentInChildren<CameraShake>();
+        cController = GetComponent<CharacterController>();
+        if (tView != null) csCameraShakeScript = tView.GetComponentInChildren<CameraShake>();
+
+        // FIX INCLINAZIONE: Assicuriamoci che il player sia dritto se lo spawn point era storto
+        transform.rotation = Quaternion.Euler(0, transform.eulerAngles.y, 0);
+        fYaw = transform.eulerAngles.y;
 
         fDefaultMoveSpeed = fMoveSpeed;
         fDefaultJumpForce = fJumpForce;
@@ -82,9 +99,30 @@ public class PlayerCharacterController : MonoBehaviour
         fDefaultGravity = fGravity;
 
         iJumpsRemaining = iMaxJumps;
-        currentRespawnPoint = transform.position; // Inizializzazione sicurezza
+        currentRespawnPoint = transform.position; 
+        
+        SetupInputs();
         ApplyCursorState();
     }
+
+    private void SetupInputs()
+    {
+        if (iaInputAsset == null) return;
+
+        iamPlayerMap = iaInputAsset.FindActionMap("Player");
+        if (iamPlayerMap != null)
+        {
+            // FIX MOVIMENTO: Abilitiamo forzatamente l'intera mappa per gestire il cambio periferiche
+            iamPlayerMap.Enable(); 
+            iaMoveAction = iamPlayerMap.FindAction("Move");
+            iaLookAction = iamPlayerMap.FindAction("Look");
+            iaJumpAction = iamPlayerMap.FindAction("Jump");
+            iaSprintAction = iamPlayerMap.FindAction("Sprint");
+        }
+    }
+
+    private void OnEnable() => iamPlayerMap?.Enable();
+    private void OnDisable() => iamPlayerMap?.Disable();
 
     private void Update()
     {
@@ -92,7 +130,6 @@ public class PlayerCharacterController : MonoBehaviour
         
         HandleMovingPlatform();
 
-        // Se siamo storditi dal rimbalzo, saltiamo l'input ma continuiamo a muovere per la fisica
         if (!bIsStunned)
         {
             HandleMovement();
@@ -101,23 +138,21 @@ public class PlayerCharacterController : MonoBehaviour
         }
 
         ApplyGravity();
-        controller.Move(velocity * Time.deltaTime);
+        cController.Move(velocity * Time.deltaTime);
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (activeMaskConfig == null) return;
+        if (macActiveMaskConfig == null) return;
 
-        // --- GESTIONE MURI ---
-        if (other.CompareTag(activeMaskConfig.wallTag))
+        if (other.CompareTag(macActiveMaskConfig.wallTag))
         {
-            float currentThreshold = fOniCurrentMultiplier / activeMaskConfig.fOniMaxSpeedMultiplier;
+            float fCurrentThreshold = fOniCurrentMultiplier / macActiveMaskConfig.fOniMaxSpeedMultiplier;
 
-            if (activeMaskConfig.maskType == MaskType.Oni)
+            if (macActiveMaskConfig.maskType == MaskType.Oni)
             {
-                if (currentThreshold >= activeMaskConfig.fOniMaxSpeedThreshold01)
+                if (fCurrentThreshold >= macActiveMaskConfig.fOniMaxSpeedThreshold01)
                 {
-                    Debug.Log("Oni sfonda il muro!");
                     SetDefaultStats();
                 }
                 else
@@ -125,7 +160,7 @@ public class PlayerCharacterController : MonoBehaviour
                     ApplyBounceImpact(other);
                 }
             }
-            else if (activeMaskConfig.maskType == MaskType.Yuki)
+            else if (macActiveMaskConfig.maskType == MaskType.Yuki)
             {
                 ApplyBounceImpact(other);
             }
@@ -141,162 +176,192 @@ public class PlayerCharacterController : MonoBehaviour
         Vector3 bounceDirection = (transform.position - wall.transform.position).normalized;
         bounceDirection.y = 0;
 
-        float bounceForce = fMoveSpeed * 3.0f;
-        velocity = bounceDirection * bounceForce;
+        float fBounceForce = fMoveSpeed * 3.0f;
+        velocity = bounceDirection * fBounceForce;
         velocity.y = fJumpForce * 0.4f;
 
-        if (cameraShakeScript != null)
-        {
-            cameraShakeScript.TriggerShake(0.4f, 0.6f);
-        }
+        if (csCameraShakeScript != null) csCameraShakeScript.TriggerShake(0.4f, 0.6f);
 
-        // Avviamo una coroutine per ripristinare il controllo dopo l'urto
         StartCoroutine(StunRoutine(0.3f));
     }
 
-    private IEnumerator StunRoutine(float duration)
+    private IEnumerator StunRoutine(float fDuration)
     {
         bIsStunned = true;
-        yield return new WaitForSeconds(duration);
+        yield return new WaitForSeconds(fDuration);
         bIsStunned = false;
     }
 
     private void HandleMovement()
     {
-        Vector2 input = Vector2.zero;
-        var kb = Keyboard.current;
-        if (kb != null)
-        {
-            if (kb.wKey.isPressed) input.y += 1f;
-            if (kb.sKey.isPressed) input.y -= 1f;
-            if (kb.aKey.isPressed) input.x -= 1f;
-            if (kb.dKey.isPressed) input.x += 1f;
-        }
+        Vector2 input = iaMoveAction != null ? iaMoveAction.ReadValue<Vector2>() : Vector2.zero;
 
         Vector3 moveDir = transform.forward * input.y + transform.right * input.x;
         moveDir.y = 0;
         if (moveDir.sqrMagnitude > 1f) moveDir.Normalize();
 
-        float targetSpeed = fMoveSpeed;
-        float currentControl = controller.isGrounded ? fGroundFriction : fAirFriction;
+        float fTargetSpeed = fMoveSpeed;
+        float fCurrentControl = cController.isGrounded ? fGroundFriction : fAirFriction;
 
-        // Sprint SOLO Oni
-        bool bShiftHeld = kb != null && kb.leftShiftKey.isPressed;
-        if (activeMaskConfig != null && activeMaskConfig.maskType == MaskType.Oni && bShiftHeld &&
+        bool bSprintHeld = iaSprintAction != null && iaSprintAction.IsPressed();
+
+        if (macActiveMaskConfig != null && macActiveMaskConfig.maskType == MaskType.Oni && bSprintHeld &&
             input.sqrMagnitude > 0.01f)
         {
             fOniHoldShiftTime += Time.deltaTime;
-            if (fOniHoldShiftTime >= activeMaskConfig.fOniChargeDelay)
+            if (fOniHoldShiftTime >= macActiveMaskConfig.fOniChargeDelay)
             {
                 fOniCurrentMultiplier = Mathf.MoveTowards(fOniCurrentMultiplier,
-                    activeMaskConfig.fOniMaxSpeedMultiplier, activeMaskConfig.fOniChargeRate * Time.deltaTime);
+                    macActiveMaskConfig.fOniMaxSpeedMultiplier, macActiveMaskConfig.fOniChargeRate * Time.deltaTime);
             }
         }
         else
         {
             fOniHoldShiftTime = 0f;
             fOniCurrentMultiplier = Mathf.MoveTowards(fOniCurrentMultiplier, 1f,
-                (activeMaskConfig != null ? activeMaskConfig.fOniDissipateRate : 5f) * Time.deltaTime);
+                (macActiveMaskConfig != null ? macActiveMaskConfig.fOniDissipateRate : 5f) * Time.deltaTime);
         }
 
-        targetSpeed *= fOniCurrentMultiplier;
-        Vector3 targetVelocity = moveDir * targetSpeed;
-        float t = 1f - Mathf.Exp(-currentControl * Time.deltaTime);
-        velocity.x = Mathf.Lerp(velocity.x, targetVelocity.x, t);
-        velocity.z = Mathf.Lerp(velocity.z, targetVelocity.z, t);
+        fTargetSpeed *= fOniCurrentMultiplier;
+        Vector3 targetVelocity = moveDir * fTargetSpeed;
+        float fTimeParam = 1f - Mathf.Exp(-fCurrentControl * Time.deltaTime);
+        velocity.x = Mathf.Lerp(velocity.x, targetVelocity.x, fTimeParam);
+        velocity.z = Mathf.Lerp(velocity.z, targetVelocity.z, fTimeParam);
     }
 
     private void HandleJump()
     {
-        if (controller.isGrounded)
+        if (cController.isGrounded)
         {
             iJumpsRemaining = iMaxJumps;
-            bYukiSecondJumpAvailable = (activeMaskConfig != null && activeMaskConfig.maskType == MaskType.Yuki);
+            bYukiSecondJumpAvailable = (macActiveMaskConfig != null && macActiveMaskConfig.maskType == MaskType.Yuki);
             if (velocity.y < 0) velocity.y = -2f;
         }
 
-        if (Keyboard.current.spaceKey.wasPressedThisFrame)
-        {
-            bool jumpSuccess = false;
-            bool isDoubleJump = false;
+        bool bJumpPressed = iaJumpAction != null && iaJumpAction.WasPressedThisFrame();
 
-            if (controller.isGrounded)
+        if (bJumpPressed)
+        {
+            bool bJumpSuccess = false;
+            bool bIsDoubleJump = false;
+
+            if (cController.isGrounded)
             {
                 velocity.y = fJumpForce;
                 iJumpsRemaining--;
-                jumpSuccess = true;
-                isDoubleJump = false;
+                bJumpSuccess = true;
+                bIsDoubleJump = false;
 
-                if (activeMaskConfig != null && activeMaskConfig.maskType == MaskType.Oni &&
+                if (macActiveMaskConfig != null && macActiveMaskConfig.maskType == MaskType.Oni &&
                     fOniCurrentMultiplier > 1.1f)
                 {
-                    velocity.x *= activeMaskConfig.fOniMomentumJumpMultiplier;
-                    velocity.z *= activeMaskConfig.fOniMomentumJumpMultiplier;
+                    velocity.x *= macActiveMaskConfig.fOniMomentumJumpMultiplier;
+                    velocity.z *= macActiveMaskConfig.fOniMomentumJumpMultiplier;
                 }
             }
-            else if (activeMaskConfig != null && activeMaskConfig.maskType == MaskType.Yuki && bYukiSecondJumpAvailable)
+            else if (macActiveMaskConfig != null && macActiveMaskConfig.maskType == MaskType.Yuki && bYukiSecondJumpAvailable)
             {
-                velocity.y = activeMaskConfig.fYukiSecondJumpForce;
+                velocity.y = macActiveMaskConfig.fYukiSecondJumpForce;
                 bYukiSecondJumpAvailable = false;
-                jumpSuccess = true;
-                isDoubleJump = true;
+                bJumpSuccess = true;
+                bIsDoubleJump = true;
             }
 
-            if (jumpSuccess) OnJump?.Invoke(isDoubleJump);
+            if (bJumpSuccess) OnJump?.Invoke(bIsDoubleJump);
         }
     }
 
     private void ApplyGravity() => velocity.y += fGravity * Time.deltaTime;
 
-    private Quaternion currentRespawnRotation;
-    // --- RESPAWN & CHECKPOINT API ---
+    private void HandleMovingPlatform()
+    {
+        RaycastHit hit;
+        if (Physics.Raycast(transform.position, Vector3.down, out hit, 1.4f))
+        {
+            if (hit.collider.CompareTag("Floor"))
+            {
+                if (tActivePlatform == hit.collider.transform)
+                {
+                    Vector3 platformDelta = tActivePlatform.position - lastPlatformPosition;
+                    if (platformDelta != Vector3.zero) cController.Move(platformDelta);
+                }
+                tActivePlatform = hit.collider.transform;
+                lastPlatformPosition = tActivePlatform.position;
+                return;
+            }
+        }
+        tActivePlatform = null;
+    }
+
+    private void HandleLook()
+    {
+        if (iaLookAction == null || tView == null || Time.deltaTime == 0f) return;
+
+        Vector2 lookInput = iaLookAction.ReadValue<Vector2>();
+        if (lookInput == Vector2.zero) return;
+
+        float fSensitivity = MouseSensitivityController.fMouseSensitivity > 0 ? MouseSensitivityController.fMouseSensitivity : 0.16f;
+
+        // FIX ROTAZIONE TELECAMERA: Riconosce se usi mouse o gamepad e adatta i valori
+        bool bIsGamepad = iaLookAction.activeControl?.device is Gamepad;
+        float fInputMultiplier = bIsGamepad ? 150f * Time.deltaTime : 1f;
+        
+        fYaw += lookInput.x * fSensitivity * fInputMultiplier;
+        fPitch = Mathf.Clamp(fPitch - lookInput.y * fSensitivity * fInputMultiplier, fPitchMin, fPitchMax);
+        
+        transform.rotation = Quaternion.Euler(0, fYaw, 0);
+        tView.localRotation = Quaternion.Euler(fPitch, 0, 0);
+    }
+
+    private void ApplyCursorState()
+    {
+        Cursor.lockState = bIsGameplay ? CursorLockMode.Locked : CursorLockMode.None;
+        Cursor.visible = !bIsGameplay;
+    }
+
+    // ==========================================
+    // PUBLIC METHODS
+    // ==========================================
     public void SetRespawnPoint(Vector3 newPos) => currentRespawnPoint = newPos;
     
-    public void SetRespawnPoint(Vector3 newPos, Quaternion newRot) 
+    public void SetRespawnPoint(Vector3 newPos, Quaternion qNewRot) 
     {
         currentRespawnPoint = newPos;
-        currentRespawnRotation = newRot;
+        qCurrentRespawnRotation = qNewRot;
     }
 
     public void TeleportTo(Vector3 pos)
     {
-        controller.enabled = false;
+        cController.enabled = false;
         transform.position = pos;
-        controller.enabled = true;
+        cController.enabled = true;
         velocity = Vector3.zero;
     }
 
-    public void TeleportTo(Vector3 pos, Quaternion rot)
+    public void TeleportTo(Vector3 pos, Quaternion qRot)
     {
-        controller.enabled = false;
+        cController.enabled = false;
         transform.position = pos;
-    
-        // SINCRONIZZAZIONE ROTAZIONE
-        yaw = rot.eulerAngles.y;
-        transform.rotation = Quaternion.Euler(0, yaw, 0);
-    
-        pitch = 0; 
-        if (view != null) view.localRotation = Quaternion.Euler(0, 0, 0);
-
-        controller.enabled = true;
+        fYaw = qRot.eulerAngles.y;
+        transform.rotation = Quaternion.Euler(0, fYaw, 0);
+        fPitch = 0; 
+        if (tView != null) tView.localRotation = Quaternion.Euler(0, 0, 0);
+        cController.enabled = true;
         velocity = Vector3.zero;
     }
     
-    // --- MASK API ---
-    public void ApplyMask(MaskAbilityConfig cfg)
+    public void ApplyMask(MaskAbilityConfig macCfg)
     {
-        activeMaskConfig = cfg;
+        macActiveMaskConfig = macCfg;
         SetDefaultStats();
 
-        // CORREZIONE: Qui applichiamo anche l'evento cambio maschera
-        if (cfg == null) return;
-        if (cfg.moveSpeed > 0) fMoveSpeed = cfg.moveSpeed;
-        if (cfg.jumpForce > 0) fJumpForce = cfg.jumpForce;
-        if (cfg.maxJumps >= 0) iMaxJumps = cfg.maxJumps;
+        if (macCfg == null) return;
+        if (macCfg.moveSpeed > 0) fMoveSpeed = macCfg.moveSpeed;
+        if (macCfg.jumpForce > 0) fJumpForce = macCfg.jumpForce;
+        if (macCfg.maxJumps >= 0) iMaxJumps = macCfg.maxJumps;
         iJumpsRemaining = iMaxJumps;
 
-        // Notifica il cambio maschera all'audio
-        OnMaskChanged?.Invoke(cfg.maskType);
+        OnMaskChanged?.Invoke(macCfg.maskType);
     }
 
     public void SetDefaultStats()
@@ -308,63 +373,10 @@ public class PlayerCharacterController : MonoBehaviour
         fOniHoldShiftTime = 0f;
     }
 
-    public void SetGameplayControl(bool active)
+    public void SetGameplayControl(bool bActive)
     {
-        bIsGameplay = active;
+        bIsGameplay = bActive;
         ApplyCursorState();
-    }
-    
-    private Transform activePlatform;
-    private Vector3 lastPlatformPosition;
-    
-    private void HandleMovingPlatform()
-    {
-        // Lanciamo un piccolo raggio verso il basso per trovare la piattaforma
-        RaycastHit hit;
-        // La distanza 1.1f dipende dall'altezza del tuo player (metà altezza + piccolo margine)
-        if (Physics.Raycast(transform.position, Vector3.down, out hit, 1.4f))
-        {
-            if (hit.collider.CompareTag("Floor"))
-            {
-                // Se siamo appena atterrati su una nuova piattaforma o sulla stessa
-                if (activePlatform == hit.collider.transform)
-                {
-                    // Calcoliamo lo spostamento della piattaforma dall'ultimo frame
-                    Vector3 platformDelta = activePlatform.position - lastPlatformPosition;
-                
-                    // Muoviamo il controller della stessa quantità prima del movimento manuale
-                    if (platformDelta != Vector3.zero)
-                    {
-                        controller.Move(platformDelta);
-                    }
-                }
-            
-                activePlatform = hit.collider.transform;
-                lastPlatformPosition = activePlatform.position;
-                return;
-            }
-        }
-
-        // Se non siamo più su una piattaforma "Floor", resettiamo
-        activePlatform = null;
-    }
-    
-
-    private void HandleLook()
-    {
-        if (Mouse.current == null || view == null) return;
-        Vector2 delta = Mouse.current.delta.ReadValue();
-        float sensitivity = MouseSensitivityController.fMouseSensitivity > 0 ? MouseSensitivityController.fMouseSensitivity : 0.16f;
-        yaw += delta.x * sensitivity;
-        pitch = Mathf.Clamp(pitch - delta.y * sensitivity, fPitchMin, fPitchMax);
-        transform.rotation = Quaternion.Euler(0, yaw, 0);
-        view.localRotation = Quaternion.Euler(pitch, 0, 0);
-    }
-
-    private void ApplyCursorState()
-    {
-        Cursor.lockState = bIsGameplay ? CursorLockMode.Locked : CursorLockMode.None;
-        Cursor.visible = !bIsGameplay;
     }
     
     public void HardStop()
@@ -372,9 +384,7 @@ public class PlayerCharacterController : MonoBehaviour
         velocity = Vector3.zero;
         fOniCurrentMultiplier = 1f;
         fOniHoldShiftTime = 0f;
-
-        // reset moving platform state
-        activePlatform = null;
+        tActivePlatform = null;
         lastPlatformPosition = Vector3.zero;
     }
 }
